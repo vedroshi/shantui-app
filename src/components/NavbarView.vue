@@ -1,10 +1,37 @@
 <script setup>
 import { ref } from 'vue'
 
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
+
 const notifExpand = ref(false)
 
 const showNotif = () => {
   notifExpand.value = !notifExpand.value
+}
+
+const langOptions = [
+  {
+    lang: 'en',
+    value: 'EN',
+    name: 'English'
+  },
+  {
+    lang: 'cn',
+    value: '中文',
+    name: 'Chinese'
+  },
+  {
+    lang: 'id',
+    value: 'ID',
+    name: 'Indonesian'
+  }
+]
+const selectedLang = ref(langOptions[0])
+</script>
+
+<script>
+export default {
+  data: () => ({})
 }
 </script>
 
@@ -40,31 +67,74 @@ const showNotif = () => {
         </button>
       </div>
       <div class="nav-menu-item language">
-        <select name="language" id="lang">
-          <option value="English">EN</option>
-          <option value="Chinese">中文</option>
-          <option value="Indonesian">ID</option>
-        </select>
+        <Listbox v-model="selectedLang">
+          <div class="relative w-100">
+            <ListboxButton class="lang-list-button">
+              <span class="truncate">{{ selectedLang.value }}</span>
+              <span
+                class="material-symbols-outlined pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
+              >
+                arrow_drop_down
+              </span>
+            </ListboxButton>
+
+            <transition
+              leave-active-class="transition duration-100 ease-in"
+              leave-from-class="opacity-100"
+              leave-to-class="opacity-0"
+            >
+              <ListboxOptions class="lang-list-options">
+                <ListboxOption
+                  v-slot="{ active, selected }"
+                  v-for="langOption in langOptions"
+                  :key="langOption.lang"
+                  :value="langOption"
+                  as="template"
+                >
+                  <li
+                    :class="[
+                      active ? 'bg-amber-100 text-amber-900' : 'text-gray-900',
+                      'relative cursor-default select-none py-2 pl-3 hover:cursor-pointer'
+                    ]"
+                  >
+                    <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
+                      {{ langOption.value }}
+                    </span>
+                  </li>
+                </ListboxOption>
+              </ListboxOptions>
+            </transition>
+          </div>
+        </Listbox>
       </div>
       <div class="nav-menu-item notification" v-bind:class="notifExpand && 'notif-expanded'">
-        <button class="notif-button" @click="showNotif">
+        <!-- <button class="notif-button" @click="showNotif">
           <span class="material-symbols-outlined"> notifications </span>
           <div class="notif-count">
             <span>1</span>
           </div>
-        </button>
-        <div v-show="notifExpand" class="notif-details">
-          <div class="notif-detail">
-            <div class="notif-content">
-              <h4>Title</h4>
-              <p>Description</p>
+        </button> -->
+        <v-btn class="notif-button" @click="showNotif">
+          <v-badge class="notif-count" content="1" color="error">
+            <span class="material-symbols-outlined"> notifications </span>
+          </v-badge>
+        </v-btn>
+        <v-card v-show="notifExpand" class="notif-details">
+          <v-card-title> Notification </v-card-title>
+          <v-divider :thickness='3' color="black"></v-divider>
+          <v-virtual-scroll height="400" width="350">
+            <div class="notif-detail">
+              <div class="notif-content">
+                <h4>Title</h4>
+                <p>Description</p>
+              </div>
+              <div class="notif-status">
+                <p>10/10/23</p>
+                <span class="status"></span>
+              </div>
             </div>
-            <div class="notif-status">
-              <p>10/10/23</p>
-              <span class="status"></span>
-            </div>
-          </div>
-        </div>
+          </v-virtual-scroll>
+        </v-card>
       </div>
     </div>
   </nav>
@@ -75,6 +145,7 @@ $navbarHeight: 50px;
 
 nav {
   height: $navbarHeight;
+  width: auto;
   background-color: var(--light);
   display: flex;
   flex-direction: row;
@@ -133,7 +204,10 @@ nav {
         display: flex;
         margin: 0.25rem;
         border-radius: 10px;
-        border: 1px solid black;
+        @apply ring-1;
+        @apply ring-black;
+        @apply ring-opacity-5;
+        @apply focus:outline-none;
 
         & input {
           padding: 1rem;
@@ -158,49 +232,65 @@ nav {
       }
 
       &.language {
-        & #lang {
-          padding: 0.35rem;
-          margin: 0.25rem 0rem;
-          border-radius: 10px;
-          background-color: white;
-          border: 1px solid black;
+        padding: 0.1rem 0;
+        & .lang-list-button {
+          @apply relative;
+          @apply w-full;
+          @apply cursor-default;
+          @apply rounded-lg;
+          @apply bg-white;
+          @apply shadow-sm;
+          @apply py-2;
+          @apply pl-3;
+          @apply pr-12;
+          @apply text-left;
+          @apply focus:outline-none;
+          @apply focus-visible:border-indigo-500;
+          @apply focus-visible:ring-2;
+          @apply focus-visible:ring-white;
+          @apply focus-visible:ring-opacity-75;
+          @apply focus-visible:ring-offset-2;
+          @apply focus-visible:ring-offset-orange-300;
+          @apply sm:text-sm;
+          @apply hover:cursor-pointer;
+          @apply hover:bg-gray-300;
+        }
 
-          &:hover {
-            background-color: var(--lightgray);
-          }
-
-          & option {
-            background-color: white;
-          }
+        & .lang-list-options {
+          @apply absolute;
+          @apply mt-1;
+          @apply max-h-60;
+          @apply w-full;
+          @apply overflow-auto;
+          @apply rounded-md;
+          @apply bg-white;
+          @apply text-base;
+          @apply shadow-md;
+          @apply ring-1;
+          @apply ring-black;
+          @apply ring-opacity-5;
+          @apply focus:outline-none;
+          @apply sm:text-sm;
         }
       }
 
       &.notification {
-        position: relative;
         .notif-button {
-          display: flex;
           border-radius: 50%;
-          padding: 8px;
+          min-width: 30px;
+          padding: 0 0.4rem;
+          box-shadow: none;
+          background-color: transparent;
+          
           &:hover {
             background-color: var(--lightgray);
           }
 
-          & .notif-count {
-            position: absolute;
-            top: 5px;
-            right: 4px;
-            width: 1rem;
-            border-radius: 50%;
-            background-color: red;
-            font-weight: bold;
-            font-size: 10px;
-            text-align: center;
-          }
         }
+
         & .notif-details {
           position: absolute;
-          right: 0;
-          width: 300px;
+          right: 10px;
           border-radius: 10px;
           height: 200px;
           @apply mt-2;
@@ -209,7 +299,6 @@ nav {
       &.notif-expanded {
         & .notif-details {
           background-color: white;
-          border: 1px solid black;
           overflow-y: auto;
           scrollbar-width: thin;
           transition: 0.2s ease-out;

@@ -23,7 +23,7 @@ const toggleKaryawanMenu = () => {
         <span class="material-symbols-outlined"> list </span>
       </button>
       <div class="logo">
-        <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+        <img alt="Vue logo" class="logo" src="@/assets/Shantui_Logo.png" width="125" height="125" />
       </div>
     </div>
 

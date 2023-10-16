@@ -20,6 +20,7 @@
 
 <style lang="scss">
 :root{
+  overflow-y: auto;
   --primary : #ffd95a;
   --secondary : #C07F00;
   --light : #fff7d4;
@@ -41,8 +42,6 @@
   }
 }
 
-
-
 * {
   margin : 0;
   box-sizing : border-box;
@@ -56,6 +55,7 @@ button{
   outline: none;
   background: none;
 }
+
 
 .app{
   display: flex;
@@ -71,7 +71,7 @@ button{
 }
 
 .right-app{
-  width: 100vw;
+  width: 100%;
 }
 
 </style>
