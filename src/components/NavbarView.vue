@@ -8,6 +8,9 @@ const notifExpand = ref(false)
 const showNotif = () => {
   notifExpand.value = !notifExpand.value
 }
+const hideNotif = () =>{
+  notifExpand.value = false
+}
 
 const langOptions = [
   {
@@ -31,7 +34,17 @@ const selectedLang = ref(langOptions[0])
 
 <script>
 export default {
-  data: () => ({})
+  data: () => ({
+    notifItems: [
+      {
+        title: 'Title',
+        description: 'Description'
+      }
+    ]
+  }),
+  methods : {
+    
+  }
 }
 </script>
 
@@ -45,15 +58,17 @@ export default {
             Dashboard
           </router-link>
         </li>
-        <li>
+        <span class="material-symbols-outlined text-base"> navigate_next </span>
+        <li class="ml-0">
           <div class="flex items-center">
-            <span class="material-symbols-outlined text-slate-400"> navigate_next </span>
-            <a href="#" class="nav-path-link"> Templates </a>
+            <router-link to="/calendar" class="nav-path-link">
+            Calendar
+          </router-link>
           </div>
         </li>
-        <li aria-current="page">
+        <span class="material-symbols-outlined text-base text-slate-400 ml-2"> navigate_next </span>
+        <li class="ml-0" aria-current="page">
           <div class="flex items-center">
-            <span class="material-symbols-outlined text-slate-400"> navigate_next </span>
             <span class="nav-path-current">Flowbite</span>
           </div>
         </li>
@@ -107,32 +122,26 @@ export default {
           </div>
         </Listbox>
       </div>
-      <div class="nav-menu-item notification" v-bind:class="notifExpand && 'notif-expanded'">
-        <!-- <button class="notif-button" @click="showNotif">
-          <span class="material-symbols-outlined"> notifications </span>
-          <div class="notif-count">
-            <span>1</span>
-          </div>
-        </button> -->
-        <v-btn class="notif-button" @click="showNotif">
+      <div class="nav-menu-item notification" v-bind:class="notifExpand && 'notif-expanded'" v-click-outside="hideNotif">
+
+        <v-btn class="notif-button" @click="showNotif" >
           <v-badge class="notif-count" content="1" color="error">
             <span class="material-symbols-outlined"> notifications </span>
           </v-badge>
         </v-btn>
         <v-card v-show="notifExpand" class="notif-details">
           <v-card-title> Notification </v-card-title>
-          <v-divider :thickness='3' color="black"></v-divider>
-          <v-virtual-scroll height="400" width="350">
-            <div class="notif-detail">
-              <div class="notif-content">
-                <h4>Title</h4>
-                <p>Description</p>
-              </div>
-              <div class="notif-status">
-                <p>10/10/23</p>
-                <span class="status"></span>
-              </div>
-            </div>
+          <v-divider :thickness="3" color="info"></v-divider>
+          <v-virtual-scroll height="350" width="350" :items="notifItems">
+            <template v-slot:default="{ item }">
+              <v-list-item :title="`${item.title}`" :subtitle="`${item.description}`" class='notif-item'>
+                <template v-slot:append>
+                  <p>10/10/23</p>
+                  <span class="status"></span>
+                </template>
+              </v-list-item>
+              <v-divider :thickness="5"> </v-divider>
+            </template>
           </v-virtual-scroll>
         </v-card>
       </div>
@@ -233,6 +242,7 @@ nav {
 
       &.language {
         padding: 0.1rem 0;
+        z-index: 99;
         & .lang-list-button {
           @apply relative;
           @apply w-full;
@@ -281,47 +291,38 @@ nav {
           padding: 0 0.4rem;
           box-shadow: none;
           background-color: transparent;
-          
+
           &:hover {
             background-color: var(--lightgray);
           }
-
         }
 
         & .notif-details {
           position: absolute;
           right: 10px;
           border-radius: 10px;
-          height: 200px;
+          height: 400px;
+          z-index: 99;
           @apply mt-2;
+
+          & .notif-item{
+            @apply hover:bg-gray-200;
+            cursor: pointer;
+          }
         }
       }
       &.notif-expanded {
         & .notif-details {
           background-color: white;
-          overflow-y: auto;
-          scrollbar-width: thin;
           transition: 0.2s ease-out;
-
-          & .notif-detail {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--lightgray);
-            padding: 5px 10px;
-            p {
-              font-size: 11px;
+          & .status {
+              display: block;
+              height: 10px;
+              width: 10px;
+              margin: 8px 15px;
+              border-radius: 50%;
+              background-color: red;
             }
-            & .notif-status {
-              & .status {
-                display: block;
-                height: 10px;
-                width: 10px;
-                margin: 8px 15px;
-                border-radius: 50%;
-                background-color: red;
-              }
-            }
-          }
         }
       }
     }

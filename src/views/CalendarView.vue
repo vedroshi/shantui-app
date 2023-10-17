@@ -1,14 +1,76 @@
 <template>
   <div class="calendar-container">
-    <h3>Calendar Page</h3>
-    <p>This is Calendar Page</p>
-   
+    <div class="calendar-wrapper">
+      <div class="calendar-display">
+        <FullCalendar width="100%" :options="calendarOptions" />
+      </div>
+      <div class="calendar-agenda">
+        <!-- <v-card
+          width="300"
+        >
+
+        </v-card> -->
+      </div>
+    </div>
   </div>
 </template>
 
-
-<script>
-
+<script setup>
+import FullCalendar from '@fullcalendar/vue3'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
 </script>
 
-<style lang="scss" scoped></style>
+<script>
+export default {
+  components: {
+    FullCalendar
+  },
+  data: () => ({
+    calendarOptions: {
+      plugins: [dayGridPlugin, interactionPlugin],
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        start: 'today',
+        center: 'title',
+        end: 'prev,next'
+      },
+      buttonText: {
+        today: 'Today'
+      },
+      height: 'auto'
+    }
+  })
+}
+</script>
+
+<style lang="scss" scoped>
+.calendar-container {
+  padding: 1rem;
+  & .calendar-wrapper {
+    display: flex;
+    & .calendar-display {
+      & .content {
+        height: 100% !important;
+      }
+      & .fc-col-header,
+      & .fc-timegrid-body {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      & .fc-scrollgrid-sync-table {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      & .fc-daygrid-body {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      & .fc-daygrid-body-balanced {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+  }
+}
+</style>
