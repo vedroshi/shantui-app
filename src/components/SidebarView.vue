@@ -12,7 +12,6 @@ const karyawanExpand = ref(false)
 
 const toggleKaryawanMenu = () => {
   karyawanExpand.value = !karyawanExpand.value
-  console.log(karyawanExpand)
 }
 </script>
 
@@ -45,7 +44,7 @@ const toggleKaryawanMenu = () => {
           <span class="menu-label">Employees</span>
           <span class="expand-more material-symbols-outlined"> expand_more </span>
         </div>
-        <div class="dropdown-items">
+        <div class="dropdown-items" v-show="karyawanExpand">
           <router-link class="menu-button" to="/karyawan">
             <span class="material-symbols-outlined"> badge </span>
             <button class="menu-label">Employee List</button>
@@ -141,18 +140,16 @@ aside {
       opacity: 0;
       transition: 0.2s ease-out;
     }
+
     &.dropdown-expanded {
       & .dropdown-items {
-        opacity: 1;
         transition: 0.2s ease-out;
         transform: translateY(1px);
       }
     }
 
     & .dropdown-items {
-      opacity: 0;
-      transition: 0.2s ease-out;
-      transform: translateY(1px);
+    
       .menu-button {
         padding: 0.2rem 0.75rem;
       }

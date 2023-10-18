@@ -7,10 +7,13 @@
   <div class="app">
     <!-- Sidebar -->
     <SidebarView />
+
     <div class="right-app">
+      <!-- Navbar -->
       <div class="navbar">
         <NavbarView />
       </div>
+      <!-- Content -->
       <div class="content">
         <router-view />
       </div>

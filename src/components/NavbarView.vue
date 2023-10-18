@@ -8,7 +8,7 @@ const notifExpand = ref(false)
 const showNotif = () => {
   notifExpand.value = !notifExpand.value
 }
-const hideNotif = () =>{
+const hideNotif = () => {
   notifExpand.value = false
 }
 
@@ -42,9 +42,7 @@ export default {
       }
     ]
   }),
-  methods : {
-    
-  }
+  methods: {}
 }
 </script>
 
@@ -61,9 +59,7 @@ export default {
         <span class="material-symbols-outlined text-base"> navigate_next </span>
         <li class="ml-0">
           <div class="flex items-center">
-            <router-link to="/calendar" class="nav-path-link">
-            Calendar
-          </router-link>
+            <router-link to="/calendar" class="nav-path-link"> Calendar </router-link>
           </div>
         </li>
         <span class="material-symbols-outlined text-base text-slate-400 ml-2"> navigate_next </span>
@@ -122,11 +118,17 @@ export default {
           </div>
         </Listbox>
       </div>
-      <div class="nav-menu-item notification" v-bind:class="notifExpand && 'notif-expanded'" v-click-outside="hideNotif">
-
-        <v-btn class="notif-button" @click="showNotif" >
+      <div
+        class="nav-menu-item notification"
+        v-bind:class="notifExpand && 'notif-expanded'"
+        v-click-outside="hideNotif"
+      >
+        <v-btn class="notif-button" @click="showNotif">
           <v-badge class="notif-count" content="1" color="error">
-            <span class="material-symbols-outlined"> notifications </span>
+            
+            <span class="material-symbols-outlined"> 
+              {{ notifExpand ? "notifications_active" : "notifications" }}  
+            </span>
           </v-badge>
         </v-btn>
         <v-card v-show="notifExpand" class="notif-details">
@@ -134,7 +136,11 @@ export default {
           <v-divider :thickness="3" color="info"></v-divider>
           <v-virtual-scroll height="350" width="350" :items="notifItems">
             <template v-slot:default="{ item }">
-              <v-list-item :title="`${item.title}`" :subtitle="`${item.description}`" class='notif-item'>
+              <v-list-item
+                :title="`${item.title}`"
+                :subtitle="`${item.description}`"
+                class="notif-item"
+              >
                 <template v-slot:append>
                   <p>10/10/23</p>
                   <span class="status"></span>
@@ -305,7 +311,7 @@ nav {
           z-index: 99;
           @apply mt-2;
 
-          & .notif-item{
+          & .notif-item {
             @apply hover:bg-gray-200;
             cursor: pointer;
           }
@@ -316,13 +322,13 @@ nav {
           background-color: white;
           transition: 0.2s ease-out;
           & .status {
-              display: block;
-              height: 10px;
-              width: 10px;
-              margin: 8px 15px;
-              border-radius: 50%;
-              background-color: red;
-            }
+            display: block;
+            height: 10px;
+            width: 10px;
+            margin: 8px 15px;
+            border-radius: 50%;
+            background-color: red;
+          }
         }
       }
     }

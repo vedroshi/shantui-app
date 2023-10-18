@@ -4,18 +4,35 @@
       <div class="calendar-display">
         <FullCalendar width="100%" :options="calendarOptions" />
       </div>
-      <div class="calendar-agenda">
-        <!-- <v-card
-          width="300"
-        >
-
-        </v-card> -->
-      </div>
+      <Transition name='show-agenda'>
+        <div class="calendar-agenda" v-show="agendaIsOpen">
+          <v-sheet rounded width="300">
+            <div class="agenda-header">
+              <v-btn icon variant="text" density="comfortable" @click="closeAgenda">
+                <span class="material-symbols-outlined"> close </span>
+              </v-btn>
+              {{ setDate && moment(setDate).format('DD MMMM yyyy') }}
+            </div>
+            <div class="agenda-contents">
+              <v-virtual-scroll width="300" height="78vh" style="padding: 1rem;" :items="agendaContents">
+                <template v-slot:default="{ item }">
+                  <v-card class="agenda-content">
+                    {{item.title}}
+                    <p>{{item.description}}</p>
+                  </v-card>
+                </template>
+              </v-virtual-scroll>
+            </div>
+          </v-sheet>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import moment from 'moment'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -26,51 +43,112 @@ export default {
   components: {
     FullCalendar
   },
-  data: () => ({
-    calendarOptions: {
-      plugins: [dayGridPlugin, interactionPlugin],
-      initialView: 'dayGridMonth',
-      headerToolbar: {
-        start: 'today',
-        center: 'title',
-        end: 'prev,next'
+  data() {
+    return {
+      agendaIsOpen : ref(false),
+      setDate: ref(null),
+      calendarOptions: {
+        plugins: [dayGridPlugin, interactionPlugin],
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          start: 'today',
+          center: 'title',
+          end: 'prevYear prev next nextYear'
+        },
+        buttonText: {
+          today: 'Today'
+        },
+        height: 'auto',
+        selectable: true,
+        dateClick: this.handleDateClick,
+        events : [
+          {
+            title: 'The Title',
+            start: moment(new Date()).format('yyyy-MM-DD'),
+            editable : false, 
+          }
+        ]
       },
-      buttonText: {
-        today: 'Today'
-      },
-      height: 'auto'
+
+      agendaContents : [
+        {
+          title : 'Title',
+          description : 'Description'
+        },
+      
+      ]
     }
-  })
+  },
+  methods: {
+    handleDateClick(arg) {
+      this.setDate = arg.dateStr
+      this.openAgenda()
+    },
+  
+    // Agenda
+    openAgenda(){
+      this.agendaIsOpen = true
+    },
+    closeAgenda(){
+      this.agendaIsOpen = false
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+
+$defaultSpacing : 1rem;
+
 .calendar-container {
-  padding: 1rem;
+  margin: $defaultSpacing;
+
   & .calendar-wrapper {
     display: flex;
     & .calendar-display {
-      & .content {
-        height: 100% !important;
-      }
-      & .fc-col-header,
-      & .fc-timegrid-body {
+      flex: 1;
+      & ::v-deep(table.fc-col-header) {
         width: 100% !important;
-        height: 100% !important;
       }
-      & .fc-scrollgrid-sync-table {
+      & ::v-deep(.fc-daygrid-body) {
         width: 100% !important;
-        height: 100% !important;
       }
-      & .fc-daygrid-body {
+      & ::v-deep(table.fc-scrollgrid-sync-table) {
         width: 100% !important;
-        height: 100% !important;
       }
-      & .fc-daygrid-body-balanced {
-        width: 100% !important;
-        height: 100% !important;
+    }
+
+    & .calendar-agenda {
+      margin-left: $defaultSpacing;
+      box-shadow: -6px -3px 8px -3px rgba(0, 0, 0, 0.22);
+
+      & .agenda-header{
+        padding: 0.5rem;
+      }
+
+
+      & .agenda-contents{
+
+        & .agenda-content{
+          padding: 0.5rem;
+          @apply my-3;
+          p{
+            font-size: small;
+            white-space: normal;
+          }
+        }
       }
     }
   }
+}
+
+.show-agenda-leave-active{
+  transition: 0.2s ease-out;
+  transform: translateX(300px);
+}
+
+.show-agenda-enter-active{
+  transition: 0.2s ease-out;
+  transform: translateX(0px);
 }
 </style>
