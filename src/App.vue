@@ -1,5 +1,5 @@
 <script setup>
-  import SidebarView from './components/SidebarView.vue';
+  import SidebarView from './components/Sidebarview.vue';
   import NavbarView from './components/NavbarView.vue';
 </script>
 

@@ -45,11 +45,13 @@ const toggleKaryawanMenu = () => {
           <span class="expand-more material-symbols-outlined"> expand_more </span>
         </div>
         <div class="dropdown-items" v-show="karyawanExpand">
-          <router-link class="menu-button" to="/karyawan">
-            <span class="material-symbols-outlined"> badge </span>
-            <button class="menu-label">Employee List</button>
-          </router-link>
-        </div>
+          <Transition name="dropdown-fall">
+            <router-link class="menu-button" to="/karyawan">
+              <span class="material-symbols-outlined"> badge </span>
+              <button class="menu-label">Employee List</button>
+            </router-link>
+          </Transition>
+          </div>
       </div>
     </div>
   </aside>
@@ -132,20 +134,14 @@ aside {
       border-radius: 10px;
       &:hover {
         cursor: pointer;
-        background-color: var(--primary);
+
       }
     }
+
     & .menu-label,
     .expand-more {
       opacity: 0;
       transition: 0.2s ease-out;
-    }
-
-    &.dropdown-expanded {
-      & .dropdown-items {
-        transition: 0.2s ease-out;
-        transform: translateY(1px);
-      }
     }
 
     & .dropdown-items {
@@ -203,9 +199,7 @@ aside {
         }
 
         .dropdown-items {
-          opacity: 0;
-          transition: 0.2s ease-out;
-          transform: translateY(1px);
+         
           & .menu-button {
             padding: 0.2rem 2rem;
           }
@@ -224,37 +218,15 @@ aside {
               transform: rotate(180deg);
             }
           }
-
-          & .dropdown-items {
-            opacity: 1;
-            transition: 0.2s ease-out;
-            transform: translateY(1px);
-          }
         }
       }
     }
   }
-
   @media (max-width: 768px) {
     position: fixed;
     z-index: 99;
-
-    .main-menu-items {
-      .menu-dropdown {
-        &.dropdown-expanded {
-          & .dropdown-items {
-            opacity: 1;
-            transition: 0.2s ease-out;
-            transform: translateY(1px);
-          }
-        }
-        .dropdown-items {
-          opacity: 0;
-          transition: 0.2s ease-out;
-          transform: translateY(1px);
-        }
-      }
-    }
   }
 }
+
+
 </style>
