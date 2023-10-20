@@ -69,6 +69,7 @@ aside {
   width: calc(2rem + 32px);
   background-color: var(--light);
   transition: 0.2s ease-out;
+  
 
   .logo {
     img {

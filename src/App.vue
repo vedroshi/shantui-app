@@ -6,7 +6,9 @@
 <template>
   <div class="app">
     <!-- Sidebar -->
-    <SidebarView />
+    <div class="sidebar">
+      <SidebarView />
+    </div>
 
     <div class="right-app">
       <!-- Navbar -->
