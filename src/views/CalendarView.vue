@@ -102,7 +102,6 @@ $defaultSpacing : 1rem;
 
 .calendar-container {
   margin: $defaultSpacing;
-
   & .calendar-wrapper {
     display: flex;
     & .calendar-display {
