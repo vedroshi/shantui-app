@@ -48,7 +48,7 @@
 }
 
 * {
-  margin : 0;
+  width: auto;
   box-sizing : border-box;
   font-family : 'Cabin' 
 }
@@ -67,11 +67,10 @@ button{
   main {
     flex : 1 1 0;
     padding : 2rem;
-
-		@media (max-width: 1440px) {
-			padding-left: 6rem;
-      
-		}
+    
+		// @media (max-width: 1440px) {
+		// 	padding-left: 6rem;
+		// }
   }
 }
 

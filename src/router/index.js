@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
+import store from '../store';
 
 import HomeView from '../views/HomeView.vue';
 import CalendarView from '../views/CalendarView.vue';
@@ -8,6 +9,7 @@ import NotFoundView from '../views/NotFoundView.vue';
 import KaryawanListView from '../views/karyawan/KaryawanListView.vue';
 import CreateKaryawanView from '../views/karyawan/CreateKaryawanView.vue';
 import PengajuanView from '../views/karyawan/PengajuanView.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,7 +44,20 @@ const router = createRouter({
           name : 'Pengajuan',
           path : 'apply',
           component : PengajuanView,
-          props : true,
+          // Middleware for Applying Page
+          beforeEnter : (to, from, next) =>
+          {
+            const selectedKaryawan = store.state.selectedKaryawan
+            const queryName = to.query.name;
+
+            if (!selectedKaryawan || selectedKaryawan.name !== queryName) {
+              // If the conditions are not met, prevent access to the route
+              next({name : 'KaryawanList'})
+            } else {
+              // Conditions are met, allow access to the route
+              next();
+            }
+          }
         },
       ]
     },

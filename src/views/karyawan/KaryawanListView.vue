@@ -173,7 +173,7 @@
               <v-row style="margin: 1rem" v-else>
                 <v-col cols="auto">
                     <v-btn
-                      @click="this.$router.push({name : 'Pengajuan' , query : {name : selectedKaryawan.name}, params : {karyawanData : selectedKaryawan}, exact: true})"
+                      @click="this.$router.push({name : 'Pengajuan' , query : {name : selectedKaryawan.name}})"
                     > Ajukan Form </v-btn>
                 </v-col>
               </v-row>
@@ -287,13 +287,14 @@ export default {
     },
 
     expandKaryawanDialog(item, row) {
-      this.karyawanExpand = true
-
       this.selectedKaryawan = row.item
+      this.$store.commit('selectKaryawan', this.selectedKaryawan)
+      this.karyawanExpand = true
     },
 
     // Karyawan Details
     shrinkKaryawanDialog() {
+      this.$store.commit('selectKaryawan' , {})
       this.karyawanExpand = false
     }
   }
