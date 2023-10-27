@@ -104,14 +104,14 @@
               style="margin-top: 10px;"
               inline
             >
-              <v-radio label="Kompensasi" value="kompensasi" class="radio-item"></v-radio>
-              <v-radio label="Cuti" value="cuti" class="radio-item"></v-radio>
-              <v-radio label="Resign" value="resign" class="radio-item"></v-radio>
+              <v-radio label="Kompensasi" value="Kompensasi" class="radio-item"></v-radio>
+              <v-radio label="Cuti" value="Cuti" class="radio-item"></v-radio>
+              <v-radio label="Resign" value="Resign" class="radio-item"></v-radio>
             </v-radio-group>
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col v-if="karyawanData.application_type == 'kompensasi'">
+          <v-col v-if="karyawanData.application_type == 'Kompensasi'">
             <v-row dense>
               <v-col cols="3">
                 <v-list-item-title>
@@ -145,7 +145,7 @@
               </v-col>
             </v-row>
           </v-col>
-          <v-col v-else-if="karyawanData.application_type == 'cuti'">
+          <v-col v-else-if="karyawanData.application_type == 'Cuti'">
             <v-row dense>
               <v-col cols="3" v-click-outside="closeStartCutiDatePicker">
                 <v-list-item-title>Tanggal Cuti</v-list-item-title>
@@ -231,7 +231,7 @@
               </v-col>
             </v-row>
           </v-col>
-          <v-col v-else-if="karyawanData.application_type == 'resign'">
+          <v-col v-else-if="karyawanData.application_type == 'Resign'">
             <v-row dense>
               <v-col cols="3" v-click-outside="closeResignDatePicker">
               <v-list-item-title>Tanggal Resign</v-list-item-title>

@@ -17,7 +17,11 @@
           </v-text-field>
         </v-col>
         <v-col cols="auto" align-self="center">
-          <v-btn rounded style="background-color: var(--primary)" @click="this.$router.push('karyawan/create')">
+          <v-btn
+            rounded
+            style="background-color: var(--primary)"
+            @click="this.$router.push('karyawan/create')"
+          >
             <span class="material-symbols-outlined"> add </span>
             Add Employee
           </v-btn>
@@ -90,7 +94,7 @@
               </v-col>
               <v-col>
                 <v-row justify="end" style="margin-bottom: 1rem">
-                  <v-btn>
+                  <v-btn @click="openLogKaryawanDialog">
                     <span class="material-symbols-outlined mr-1"> timeline </span>
                     Log Karyawan
                   </v-btn>
@@ -166,19 +170,247 @@
                 <v-col cols="auto">
                   <v-btn> Tolak Pengajuan </v-btn>
                 </v-col>
-                <v-col cols="auto">
+                <v-col cols="auto" @click="openEditPengajuanDialog">
                   <v-btn> Edit Form </v-btn>
                 </v-col>
               </v-row>
               <v-row style="margin: 1rem" v-else>
                 <v-col cols="auto">
-                    <v-btn
-                      @click="this.$router.push({name : 'Pengajuan' , query : {name : selectedKaryawan.name}})"
-                    > Ajukan Form </v-btn>
+                  <v-btn
+                    @click="
+                      this.$router.push({
+                        name: 'Pengajuan',
+                        query: { name: selectedKaryawan.name }
+                      })
+                    "
+                  >
+                    Ajukan Form
+                  </v-btn>
                 </v-col>
               </v-row>
             </div>
           </v-sheet>
+        </v-dialog>
+        <v-dialog v-model="isLogKaryawanOpen" width="auto">
+          <v-card width="400">
+            <v-img height="200" :src="card_bg" cover class="text-white">
+              <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
+                <v-toolbar-title class="text-h6"> Log Karyawan </v-toolbar-title>
+                <template v-slot:append>
+                  <v-btn @click="closeLogKaryawanDialog" icon="Close">
+                    <span class="material-symbols-outlined"> close </span>
+                  </v-btn>
+                </template>
+              </v-toolbar>
+              <v-card
+                style="padding: 1rem; position: absolute; bottom: 0"
+                color="rgba(0, 0, 0, 0)"
+                variant="flat"
+              >
+                <v-row dense>
+                  <v-col>
+                    <b> Name : {{ selectedKaryawan.name }} </b>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col>
+                    <b> Position : {{ selectedKaryawan.position }} </b>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-img>
+
+            <v-card-text style="overflow-y: scroll; padding: 0rem">
+              <v-list>
+                <v-list-item v-for="date in getLogDates(messages)" :key="date">
+                  <div class="font-weight-bold ms-1 mb-2">{{ date }}</div>
+                  <v-timeline density="compact" align="start" line-inset="0">
+                    <v-timeline-item
+                      v-for="message in messages.filter((message) => message.date == date)"
+                      :key="message.date"
+                      :dot-color="message.color"
+                      size="x-small"
+                    >
+                      <div class="mb-4">
+                        <div>{{ message.message }}</div>
+                        <div class="font-weight-normal">
+                          <strong
+                            >{{ message.start ? message.start : '' }} {{ message.end ? '-' : '' }}
+                            {{ message.end ? message.end : '' }}
+                          </strong>
+                        </div>
+                      </div>
+                    </v-timeline-item>
+                  </v-timeline>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="isEditPengajuanOpen" width="auto">
+          <v-card width="400">
+            <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
+              <v-toolbar-title class="text-h6"> Edit Pengajuan </v-toolbar-title>
+              <template v-slot:append>
+                <v-btn @click="closeEditPengajuanDialog" icon="Close">
+                  <span class="material-symbols-outlined"> close </span>
+                </v-btn>
+              </template>
+            </v-toolbar>
+            <v-container>
+            <v-row dense>
+              <v-col>
+                <v-list-item-title>
+                  Pengajuan
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  <i> Apply </i> 
+                </v-list-item-subtitle>
+              </v-col>
+            </v-row> 
+            <v-row dense>
+              {{console.log(getCurrentApplicationType)}}
+              <v-radio-group 
+                  v-model="getCurrentApplicationType.application_type"
+                  density="compact"
+                  style="margin-top: 10px;"
+                  inline
+                >
+                  <v-radio label="Kompensasi" value="kompensasi" style="margin-right : 1rem" ></v-radio>
+                  <v-radio label="Cuti" value="cuti" style="margin-right : 1rem" ></v-radio>
+                  <v-radio label="Resign" value="resign" style="margin-right : 1rem" ></v-radio>
+                </v-radio-group>
+            </v-row>
+            <v-col v-if="getCurrentApplicationType.application_type == 'Kompensasi'">
+              <v-row dense>
+                <v-col cols="3">
+                  <v-list-item-title> Mulai Kontrak </v-list-item-title>
+                  <v-list-item-subtitle>
+                    <i> Start Contract </i>
+                  </v-list-item-subtitle>
+                  <v-text-field readonly variant="underlined" density="compact">
+                    27/10/2023
+                  </v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-list-item-title> Akhir Kontrak </v-list-item-title>
+                  <v-list-item-subtitle>
+                    <i> End Contract </i>
+                  </v-list-item-subtitle>
+                  <v-text-field readonly variant="underlined" density="compact">
+                    27/04/2024
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col v-else-if="getCurrentApplicationType.application_type == 'Cuti'">
+              <v-row dense>
+                <v-col cols="3" v-click-outside="closeStartCutiDatePicker">
+                  <v-list-item-title>Tanggal Cuti</v-list-item-title>
+                  <v-list-item-subtitle> <i> Leave Date </i> </v-list-item-subtitle>
+                  <v-text-field
+                    v-model="applyData.start_cuti"
+                    variant="underlined"
+                    density="compact"
+                    append-inner-icon="mdi-calendar"
+                    @click:appendInner="openStartCutiDatePicker"
+                    placeholder="DD/MM/YYYY"
+                    clearable
+                    required
+                    :rules="applyRules"
+                  ></v-text-field>
+                  <VDatePicker
+                    v-model.string="applyData.start_cuti"
+                    mode="date"
+                    @dayclick="closeStartCutiDatePicker"
+                    :masks="dateFormat"
+                    :max-date="new Date()"
+                    v-if="togglerHandler.isStartCutiDatePickerOpen"
+                  >
+                  </VDatePicker>
+                </v-col>
+                <v-col cols="3" v-click-outside="closeEndCutiDatePicker" v-if="isEndCuti">
+                  <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
+                  <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
+                  <v-text-field
+                    v-model="applyData.end_cuti"
+                    variant="underlined"
+                    density="compact"
+                    append-inner-icon="mdi-calendar"
+                    @click:appendInner="openEndCutiDatePicker"
+                    placeholder="DD/MM/YYYY"
+                    clearable
+                    required
+                    :rules="applyRules"
+                  ></v-text-field>
+                  <VDatePicker
+                    v-model.string="applyData.end_cuti"
+                    mode="date"
+                    @dayclick="closeEndCutiDatePicker"
+                    :masks="dateFormat"
+                    :max-date="new Date()"
+                    v-if="togglerHandler.isEndCutiDatePickerOpen"
+                  >
+                  </VDatePicker>
+                </v-col>
+                <v-col align-self="start" cols="3">
+                  <v-checkbox label="Balik Cuti" v-model="isEndCuti"></v-checkbox>
+                </v-col>
+              </v-row>
+              <v-row dense>
+                <v-col cols="3" v-if="isDepart">
+                  <v-list-item-title> Keberangkatan </v-list-item-title>
+                  <v-list-item-subtitle> Departure </v-list-item-subtitle>
+                  <v-text-field variant="underlined" placeholder="Kendari"> </v-text-field>
+                </v-col>
+                <v-col cols="3" v-if="isDepart">
+                  <v-list-item-title> Kedatangan </v-list-item-title>
+                  <v-list-item-subtitle> Arrival </v-list-item-subtitle>
+                  <v-text-field variant="underlined" placeholder="Jakarta"> </v-text-field>
+                </v-col>
+                <v-col align-self="center">
+                  <v-checkbox label="Berangkat" v-model="isDepart"></v-checkbox>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col v-else-if="getCurrentApplicationType.application_type == 'Resign'">
+              <v-row dense>
+                <v-col cols="3" v-click-outside="closeResignDatePicker">
+                  <v-list-item-title>Tanggal Resign</v-list-item-title>
+                  <v-list-item-subtitle> <i> Resign Date </i> </v-list-item-subtitle>
+                  <v-text-field
+                    v-model="EditResignDate"
+                    variant="underlined"
+                    density="compact"
+                    append-inner-icon="mdi-calendar"
+                    @click:appendInner="openResignDatePicker"
+                    placeholder="DD/MM/YYYY"
+                    clearable
+                    required
+                  ></v-text-field>
+                  <VDatePicker
+                    v-model.string="editResignDate"
+                    mode="date"
+                    @dayclick="closeResignDatePicker"
+                    :masks="dateFormat"
+                    :min-date="new Date()"
+                    v-if="togglerHandler.isResignDatePickerOpen"
+                  >
+                  </VDatePicker>
+                </v-col>
+              </v-row>
+            </v-col>
+            </v-container>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" variant="text" @click="closeEditPengajuanDialog">
+                Close
+              </v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="closeEditPengajuanDialog">
+                Save
+              </v-btn>
+            </v-card-actions>
+          </v-card>
         </v-dialog>
       </div>
     </div>
@@ -187,12 +419,24 @@
 
 <script setup>
 import { ref } from 'vue'
+
+import card_bg from '../../assets/crane_card_bg.jpg'
 </script>
 
 <script>
 export default {
   data: () => ({
     karyawanExpand: ref(false),
+    isLogKaryawanOpen: ref(false),
+    isEditPengajuanOpen: ref(false),
+
+    togglerHandler : {
+      isStartCutiDatePickerOpen : ref(false),
+      isEndCutiDatePickerOpen : ref(false),
+      isResignDatePickerOpen : ref(false)
+    },
+
+    
     selectedKaryawan: {},
     search: ref(''),
 
@@ -209,8 +453,8 @@ export default {
         status: 'Active',
         start_contract: '20/07/2023',
         end_contract: '20/01/2024',
+        application_status: null,
         application_type: null,
-        application_status: null
       },
       {
         nik: '1200012232500021',
@@ -224,8 +468,8 @@ export default {
         status: 'Close Project',
         start_contract: '13/03/2023',
         end_contract: '13/09/2023',
-        application_type: 'Kompensasi',
-        application_status: 'Pending'
+        application_status: null,
+        application_type: null,
       },
       {
         nik: '1200012232500021',
@@ -239,8 +483,8 @@ export default {
         status: 'Warning',
         start_contract: '27/04/2023',
         end_contract: '27/10/2024',
+        application_status: 'Pending',
         application_type: 'Resign',
-        application_status: 'Pending'
       }
     ],
     headers: [
@@ -275,6 +519,26 @@ export default {
         align: 'center',
         key: 'status'
       }
+    ],
+
+    messages: [
+      {
+        date: '10/10/2023',
+        start: '24/10/2023',
+        end: '24/10/2023',
+        message: `Ajukan Kompensasi`,
+        color: 'deep-purple-lighten-1'
+      },
+      {
+        date: '15/10/2023',
+        message: `Ajukan Kompensasi Disetujui`,
+        color: 'green'
+      },
+      {
+        date: '24/10/2023',
+        message: `Lanjut Kontrak`,
+        color: 'blue-lighten-1'
+      }
     ]
   }),
   methods: {
@@ -294,9 +558,44 @@ export default {
 
     // Karyawan Details
     shrinkKaryawanDialog() {
-      this.$store.commit('selectKaryawan' , {})
+      this.$store.commit('selectKaryawan', {})
       this.karyawanExpand = false
+    },
+
+    openLogKaryawanDialog() {
+      this.isLogKaryawanOpen = true
+    },
+    closeLogKaryawanDialog() {
+      this.isLogKaryawanOpen = false
+    },
+
+    openEditPengajuanDialog() {
+      this.isEditPengajuanOpen = true
+    },
+    closeEditPengajuanDialog() {
+      this.isEditPengajuanOpen = false
+    },
+
+    getLogDates(messages) {
+      const uniqueDates = [...new Set(messages.map((message) => message.date))]
+
+      // Sort the unique dates in ascending order
+      uniqueDates.sort((a, b) => {
+        const dateA = new Date(a.split('/').reverse().join('/'))
+        const dateB = new Date(b.split('/').reverse().join('/'))
+        return dateB - dateA
+      })
+
+      return uniqueDates
     }
+  },
+  computed : {
+    getCurrentApplicationType(){
+      const editKaryawanFormData = {
+        application_type : this.selectedKaryawan.application_type,
+      }
+     return editKaryawanFormData;
+    },
   }
 }
 </script>
