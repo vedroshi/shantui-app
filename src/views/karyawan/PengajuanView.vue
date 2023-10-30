@@ -18,7 +18,7 @@
               placeholder="DD/MM/YYYY"
               clearable
               required
-              :rules="applyRules"
+              :rules="rules.applyRules"
             ></v-text-field>
             <VDatePicker
               v-model.string="applyData.apply_date"
@@ -78,6 +78,8 @@
               {{this.karyawanData.site}}
             </v-text-field>
           </v-col>
+        </v-row>
+        <v-row dense>
           <v-col cols=3>
             <v-list-item-title> Jabatan </v-list-item-title>
             <v-list-item-subtitle> <i> Position </i>  </v-list-item-subtitle>
@@ -87,6 +89,18 @@
               density="compact"
             >
               {{this.karyawanData.position}}
+            </v-text-field>
+          </v-col>
+          <v-col cols=3>
+            <v-list-item-title> Tonase </v-list-item-title>
+            <v-list-item-subtitle> <i> Tonnage </i>  </v-list-item-subtitle>
+            <v-text-field
+              variant="underlined"
+              readonly
+              density="compact"
+              suffix="Ton"
+            >
+              {{this.karyawanData.tonnage}}
             </v-text-field>
           </v-col>
         </v-row>
@@ -99,10 +113,11 @@
               <i> Apply </i> 
             </v-list-item-subtitle>
             <v-radio-group 
-              v-model="this.karyawanData.application_type"
+              v-model="applyData.application_type"
               density="compact"
               style="margin-top: 10px;"
               inline
+              :rules="rules.applyRules"
             >
               <v-radio label="Kompensasi" value="Kompensasi" class="radio-item"></v-radio>
               <v-radio label="Cuti" value="Cuti" class="radio-item"></v-radio>
@@ -111,7 +126,7 @@
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col v-if="karyawanData.application_type == 'Kompensasi'">
+          <v-col v-if="applyData.application_type == 'Kompensasi'">
             <v-row dense>
               <v-col cols="3">
                 <v-list-item-title>
@@ -121,11 +136,11 @@
                  <i> Start Contract </i> 
                 </v-list-item-subtitle>
                 <v-text-field
+                  v-model="applyData.start_contract"
                   readonly
                   variant='underlined'
                   density="compact"
                 >
-                  27/10/2023
                 </v-text-field>
               </v-col>
               <v-col cols="3">
@@ -136,16 +151,16 @@
                  <i> End Contract </i> 
                 </v-list-item-subtitle>
                 <v-text-field
+                  v-model="applyData.end_contract"
                   readonly
                   variant='underlined'
                   density="compact"
                 >
-                  27/04/2024
                 </v-text-field>
               </v-col>
             </v-row>
           </v-col>
-          <v-col v-else-if="karyawanData.application_type == 'Cuti'">
+          <v-col v-else-if="applyData.application_type == 'Cuti'">
             <v-row dense>
               <v-col cols="3" v-click-outside="closeStartCutiDatePicker">
                 <v-list-item-title>Tanggal Cuti</v-list-item-title>
@@ -159,19 +174,18 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="applyRules"
+                  :rules="rules.applyRules"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.start_cuti"
                   mode="date"
                   @dayclick="closeStartCutiDatePicker"
                   :masks="dateFormat"
-                  :max-date="new Date()"
                   v-if="togglerHandler.isStartCutiDatePickerOpen"
                 >
                 </VDatePicker>
               </v-col>
-              <v-col cols="3" v-click-outside="closeEndCutiDatePicker" v-if="isEndCuti">
+              <v-col cols="3" v-click-outside="closeEndCutiDatePicker" v-if="togglerHandler.isEndCuti">
                 <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
                 <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
                 <v-text-field
@@ -183,7 +197,7 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="applyRules"
+                  :rules="rules.applyRules"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.end_cuti"
@@ -196,11 +210,11 @@
                 </VDatePicker>
               </v-col>
               <v-col align-self="start" cols="3">
-                <v-checkbox label="Balik Cuti" v-model="isEndCuti"></v-checkbox>
+                <v-checkbox label="Balik Cuti" v-model="togglerHandler.isEndCuti"></v-checkbox>
               </v-col>
             </v-row>
             <v-row dense>
-              <v-col cols="3" v-if="isDepart">
+              <v-col cols="3" v-if="togglerHandler.isDepart">
                 <v-list-item-title>
                   Keberangkatan
                 </v-list-item-title>
@@ -210,10 +224,11 @@
                 <v-text-field
                   variant='underlined'
                   placeholder="Kendari"
+                  :rules="rules.travelRules"
                 >
                 </v-text-field>
               </v-col>
-              <v-col cols="3" v-if="isDepart">
+              <v-col cols="3" v-if="togglerHandler.isDepart">
                 <v-list-item-title>
                   Kedatangan
                 </v-list-item-title>
@@ -223,15 +238,16 @@
                 <v-text-field
                   variant='underlined'
                   placeholder="Jakarta"
+                  :rules = "rules.travelRules"
                 >
                 </v-text-field>
               </v-col>
               <v-col align-self="center">
-                <v-checkbox label="Berangkat" v-model="isDepart"></v-checkbox>
+                <v-checkbox label="Berangkat" v-model="togglerHandler.isDepart"></v-checkbox>
               </v-col>
             </v-row>
           </v-col>
-          <v-col v-else-if="karyawanData.application_type == 'Resign'">
+          <v-col v-else-if="applyData.application_type == 'Resign'">
             <v-row dense>
               <v-col cols="3" v-click-outside="closeResignDatePicker">
               <v-list-item-title>Tanggal Resign</v-list-item-title>
@@ -245,7 +261,7 @@
                 placeholder="DD/MM/YYYY"
                 clearable
                 required
-                :rules="applyRules"
+                :rules="rules.applyRules"
               ></v-text-field>
               <VDatePicker
                 v-model.string="applyData.resign_date"
@@ -281,6 +297,9 @@ export default {
     karyawanData : ref({}),
 
     togglerHandler : {
+      isEndCuti : ref(false),
+      isDepart : ref(true),
+
       isApplyDatePickerOpen: ref(false),
       isStartCutiDatePickerOpen: ref(false),
       isEndCutiDatePickerOpen: ref(false),
@@ -288,18 +307,28 @@ export default {
     },
 
 
-    isEndCuti : ref(false),
-    isDepart : ref(true),
-
-
+    // Application Form Data
     applyData: {
+      application_type : ref(null),
       apply_date: ref(moment(new Date()).format('DD/MM/YYYY')),
+
+      // Kompensasi
+      start_contract : ref(null),
+      end_contract : ref(null),
+      // Cuti
       start_cuti : ref(null),
       end_cuti : ref(null),
+      depart : ref(null),
+      arrival : ref(null),
+      // Resign
       resign_date : ref(null),
     },
 
-    applyRules: [(value) => !!value || '*Required'],
+    rules : {
+      applyRules: [(value) => !!value || '*Required'],
+ 
+      travelRules : [(value) => !!value && this.togglerHandler.isDepart || "* Required" ],
+    },
 
     dateFormat: ref({
       modelValue: 'DD/MM/YYYY'
@@ -322,7 +351,7 @@ export default {
     },
 
     toogleEndCuti(){
-      this.isEndCuti = !this.isEndCuti;
+      this.togglerHandler.isEndCuti = !this.togglerHandlerisEndCuti;
     },
 
     openEndCutiDatePicker() {
@@ -339,16 +368,46 @@ export default {
       this.togglerHandler.isResignDatePickerOpen = false
     },
 
+    getDateObj(dateString){
+      const [date, month, year] = dateString.split('/');
+      return new Date(year, month - 1, date);
+    },
+
+    // Application Form Submit
     async applyForm(){
-      const { valid } = await this.$refs.form.validate()
+      const { valid } = await this.$refs.form.validate();
       if (valid){
+        console.log(this.applyData)
         console.log("Applied")
       }
     }
 
   },
   mounted(){
-    this.karyawanData = this.$store.state.selectedKaryawan
+    this.karyawanData = this.$store.state.selectedKaryawan;
+    this.applyData.start_contract = this.getStartContractDate;
+    this.applyData.end_contract = this.getEndContractDate;
+  },
+
+  computed: {
+  // Get the Init Start Contract Date
+    getStartContractDate(){
+      if(this.karyawanData){
+        const endDate = this.getDateObj(this.karyawanData.end_contract);
+        endDate.setDate(endDate.getDate() + 1);
+        return moment(endDate).format('DD/MM/YYYY');
+      }
+      return null;
+    },
+    // Get the Init End Contract Date
+    getEndContractDate(){
+      if(this.karyawanData){
+        const endDate = this.getDateObj(this.applyData.start_contract);
+        endDate.setMonth(endDate.getMonth() + 6);
+        return moment(endDate).format('DD/MM/YYYY');
+      }
+      return null;
+    },
   }
 }
 </script>
