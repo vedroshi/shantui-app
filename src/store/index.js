@@ -8,7 +8,7 @@ const store = createStore({
     mutations: {
       // Mutations to modify the state go here
       selectKaryawan(state, karyawan) {
-          state.selectedKaryawan = karyawan
+        state.selectedKaryawan = karyawan
       }
     },
     actions: {

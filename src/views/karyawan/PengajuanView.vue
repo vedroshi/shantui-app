@@ -40,7 +40,7 @@
               readonly
               density="compact"
             >
-              {{ this.karyawanData.name }}
+              {{ this.selectedKaryawan.name }}
             </v-text-field>
           </v-col>
           <v-col cols=3>
@@ -51,7 +51,7 @@
               readonly
               density="compact"
             >
-              {{this.karyawanData.join_date}}
+              {{this.selectedKaryawan.join_date}}
             </v-text-field>
           </v-col>
         </v-row>
@@ -75,7 +75,7 @@
               readonly
               density="compact"
             >
-              {{this.karyawanData.site}}
+              {{this.selectedKaryawan.site}}
             </v-text-field>
           </v-col>
         </v-row>
@@ -88,21 +88,23 @@
               readonly
               density="compact"
             >
-              {{this.karyawanData.position}}
+              {{this.selectedKaryawan.position}}
             </v-text-field>
           </v-col>
-          <v-col cols=3>
-            <v-list-item-title> Tonase </v-list-item-title>
-            <v-list-item-subtitle> <i> Tonnage </i>  </v-list-item-subtitle>
-            <v-text-field
-              variant="underlined"
-              readonly
-              density="compact"
-              suffix="Ton"
-            >
-              {{this.karyawanData.tonnage}}
-            </v-text-field>
-          </v-col>
+          <div v-if="selectedKaryawan.position == 'Operator Crane'">
+            <v-col cols=3>
+              <v-list-item-title> Tonase </v-list-item-title>
+              <v-list-item-subtitle> <i> Tonnage </i>  </v-list-item-subtitle>
+              <v-text-field
+                variant="underlined"
+                readonly
+                density="compact"
+                suffix="Ton"
+              >
+                {{this.selectedKaryawan.tonnage}}
+              </v-text-field>
+            </v-col>
+          </div>
         </v-row>
         <v-row dense>
           <v-col>
@@ -197,18 +199,19 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="rules.applyRules"
+                  :rules="rules.endCutiRules"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.end_cuti"
                   mode="date"
                   @dayclick="closeEndCutiDatePicker"
                   :masks="dateFormat"
-                  :max-date="new Date()"
+                  :min-date="applyData.start_cuti"
                   v-if="togglerHandler.isEndCutiDatePickerOpen"
                 >
                 </VDatePicker>
               </v-col>
+
               <v-col align-self="start" cols="3">
                 <v-checkbox label="Balik Cuti" v-model="togglerHandler.isEndCuti"></v-checkbox>
               </v-col>
@@ -289,23 +292,23 @@
 <script setup>
 import { ref } from 'vue'
 import moment from 'moment'
+import {karyawanMixin} from '../../mixins/karyawanMixin';
 </script>
 
 <script>
 export default {
+  mixins : [karyawanMixin],
   data: () => ({
-    karyawanData : ref({}),
 
     togglerHandler : {
       isEndCuti : ref(false),
-      isDepart : ref(true),
+      isDepart : ref(false),
 
       isApplyDatePickerOpen: ref(false),
       isStartCutiDatePickerOpen: ref(false),
       isEndCutiDatePickerOpen: ref(false),
       isResignDatePickerOpen: ref(false),
     },
-
 
     // Application Form Data
     applyData: {
@@ -325,14 +328,14 @@ export default {
     },
 
     rules : {
-      applyRules: [(value) => !!value || '*Required'],
- 
-      travelRules : [(value) => !!value && this.togglerHandler.isDepart || "* Required" ],
+      applyRules: [(value) => !!value || "*Required"],
+      travelRules : [(value) => !!value && this.togglerHandler.isDepart || "*Required" ],
+      endCutiRules : [ 
+        (value) => !!value || "*Required",
+      ],
     },
 
-    dateFormat: ref({
-      modelValue: 'DD/MM/YYYY'
-    })
+    
   }),
 
   methods: {
@@ -350,13 +353,19 @@ export default {
       this.togglerHandler.isStartCutiDatePickerOpen = false
     },
 
-    toogleEndCuti(){
-      this.togglerHandler.isEndCuti = !this.togglerHandlerisEndCuti;
+    openEndCutiDatePicker() {
+      try{
+        if(this.applyData.start_cuti){
+          this.getDateObj(this.applyData.start_cuti)
+          this.togglerHandler.isEndCutiDatePickerOpen = true
+        }else{
+          throw new Error("Tanggal Cuti is Required")
+        }
+      }catch (err){
+        alert(err.message)
+      }
     },
 
-    openEndCutiDatePicker() {
-      this.togglerHandler.isEndCutiDatePickerOpen = true
-    },
     closeEndCutiDatePicker() {
       this.togglerHandler.isEndCutiDatePickerOpen = false
     },
@@ -368,14 +377,11 @@ export default {
       this.togglerHandler.isResignDatePickerOpen = false
     },
 
-    getDateObj(dateString){
-      const [date, month, year] = dateString.split('/');
-      return new Date(year, month - 1, date);
-    },
 
     // Application Form Submit
     async applyForm(){
       const { valid } = await this.$refs.form.validate();
+      // console.log(this.getDateObj(this.applyData.start_cuti) - this.getDateObj(this.applyData.end_cuti) )
       if (valid){
         console.log(this.applyData)
         console.log("Applied")
@@ -384,31 +390,9 @@ export default {
 
   },
   mounted(){
-    this.karyawanData = this.$store.state.selectedKaryawan;
-    this.applyData.start_contract = this.getStartContractDate;
-    this.applyData.end_contract = this.getEndContractDate;
+    this.applyData.start_contract = this.setStartContractDate;
+    this.applyData.end_contract = this.setEndContractDate;
   },
-
-  computed: {
-  // Get the Init Start Contract Date
-    getStartContractDate(){
-      if(this.karyawanData){
-        const endDate = this.getDateObj(this.karyawanData.end_contract);
-        endDate.setDate(endDate.getDate() + 1);
-        return moment(endDate).format('DD/MM/YYYY');
-      }
-      return null;
-    },
-    // Get the Init End Contract Date
-    getEndContractDate(){
-      if(this.karyawanData){
-        const endDate = this.getDateObj(this.applyData.start_contract);
-        endDate.setMonth(endDate.getMonth() + 6);
-        return moment(endDate).format('DD/MM/YYYY');
-      }
-      return null;
-    },
-  }
 }
 </script>
 
