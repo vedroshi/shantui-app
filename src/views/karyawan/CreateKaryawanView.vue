@@ -70,7 +70,7 @@
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col cols="5">
+          <v-col cols="3">
             <v-list-item-title>Alamat</v-list-item-title>
             <v-list-item-subtitle> <i> Address </i> </v-list-item-subtitle>
             <v-text-field
@@ -117,6 +117,16 @@
             <v-list-item-subtitle> <i> Village </i> </v-list-item-subtitle>
             <v-text-field
               v-model="formData.village"
+              variant="underlined"
+              density="compact"
+              type="text"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="2">
+            <v-list-item-title>Provinsi</v-list-item-title>
+            <v-list-item-subtitle> <i> Province </i> </v-list-item-subtitle>
+            <v-text-field
+              v-model="formData.province"
               variant="underlined"
               density="compact"
               type="text"
@@ -242,19 +252,17 @@
 <script setup>
 import { ref } from 'vue'
 import moment from 'moment'
+import {karyawanMixin} from '../../mixins/karyawanMixin'
 </script>
 
 <script>
 export default {
+  mixins : [karyawanMixin],
   data: () => ({
     isDobDatePickerOpen: ref(false),
     isJoinDatePickerOpen: ref(false),
 
     isSnackbarOpen: ref(false),
-
-    dateFormat: ref({
-      modelValue: 'DD/MM/YYYY'
-    }),
 
     positionItems: [
       {
@@ -309,6 +317,7 @@ export default {
       rw: ref(null),
       village: ref(null),
       subdistrict: ref(null),
+      province : ref(null),
       join_date: ref(moment(new Date()).format('DD/MM/YYYY')),
       religion: ref(null),
       selectedPosition: ref(null),

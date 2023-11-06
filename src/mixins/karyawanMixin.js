@@ -11,14 +11,7 @@ export const karyawanMixin = {
                 "-1" : "Pending",
                 null : ''
             },
-            karyawanStatus : {
-                1 : 'Active',
-                2 : 'Warning',
-                3 : 'Cuti',
-                4 : 'Close Project',
-                5 : 'Resign',
-                6 : 'Cut Off'
-            },
+           
             dateFormat: ref({
                 modelValue: 'DD/MM/YYYY'
               })

@@ -16,6 +16,20 @@
             <span class="material-symbols-outlined mr-3 mt-1"> search </span>
           </v-text-field>
         </v-col>
+        <v-col cols="3">
+          <v-text-field
+            hide-details
+            variant="underlined"
+            density="compact"
+            class="shrink"
+            placeholder="Tanggal Join"
+            readonly
+            append-inner-icon="mdi-calendar"
+            @click="togglerHandler.isJoinDateFilterOpen = !togglerHandler.isJoinDateFilterOpen"
+            v-model="getJoinDateRange"
+          >
+          </v-text-field>
+        </v-col>
         <v-col cols="auto" align-self="center">
           <v-btn
             rounded
@@ -32,17 +46,18 @@
       <div class="karyawan-table">
         <v-data-table
           :headers="headers"
-          :items="employees"
+          :items="filteredEmployees"
           :search="search"
           class="elavation-1"
           density="compact"
           item-key="nik"
           height="70vh"
           @click:row="expandKaryawanDialog"
+          clearable
           hover
         >
-         <template v-slot:[`item.end_contract`]="{ value }">
-            {{ value ?  moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
+          <template v-slot:[`item.join_date`]="{ value }">
+            {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
 
           <template v-slot:[`item.status`]="{ value }">
@@ -51,14 +66,15 @@
             </v-chip>
           </template>
           <template v-slot:[`item.application_status`]="{ value, item }">
-             {{
-              value ? `Ajukan ${item.application.application_type} (${this.applicationStatus[value]})` : 
-              item.status == 'Cuti' || item.status == 'Resign' || item.status == 'Cut Off' ? item.status : "Belum Ajukan Form"
-             }}
+            {{
+              value
+                ? `Ajukan ${item.application.application_type} (${this.applicationStatus[value]})`
+                : item.status == 'Cuti' || item.status == 'Resign' || item.status == 'Cut Off'
+                ? item.status
+                : 'Belum Ajukan Form'
+            }}
           </template>
-
         </v-data-table>
-
 
         <!-- Karyawan Details Dialog  -->
         <v-dialog
@@ -101,7 +117,7 @@
                     <v-list-item>
                       <v-list-item-subtitle>Tonase</v-list-item-subtitle>
                       <v-list-item-title>{{
-                        selectedKaryawan.tonnage  ?  `${selectedKaryawan.tonnage} T` : '-'
+                        selectedKaryawan.tonnage ? `${selectedKaryawan.tonnage} T` : '-'
                       }}</v-list-item-title>
                     </v-list-item>
                   </div>
@@ -148,13 +164,23 @@
 
               <v-row align="center" style="margin: 0.05rem">
                 <v-list-item>
-                  <v-list-item-subtitle>Mulai {{selectedKaryawan.status == "Cuti" ?  'Cuti' : 'Kontrak'}}</v-list-item-subtitle>
+                  <v-list-item-subtitle
+                    >Mulai
+                    {{
+                      selectedKaryawan.status == 'Cuti' ? 'Cuti' : 'Kontrak'
+                    }}</v-list-item-subtitle
+                  >
                   <v-list-item-title>{{ selectedKaryawan.start_contract }}</v-list-item-title>
                 </v-list-item>
-                <div v-if="selectedKaryawan.end_contract" style="display: flex; align-items: center">
+                <div
+                  v-if="selectedKaryawan.end_contract"
+                  style="display: flex; align-items: center"
+                >
                   Sampai
                   <v-list-item>
-                    <v-list-item-subtitle>Akhir {{selectedKaryawan.status == "Cuti" ?  'Cuti' : 'Kontrak'}} </v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      >Akhir {{ selectedKaryawan.status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
+                    </v-list-item-subtitle>
                     <v-list-item-title>{{ selectedKaryawan.end_contract }}</v-list-item-title>
                   </v-list-item>
                 </div>
@@ -163,7 +189,11 @@
               <v-row align="center" style="margin: 0.05rem">
                 <v-list-item>
                   <v-list-item-subtitle>Status</v-list-item-subtitle>
-                  <v-chip :color="getColor(selectedKaryawan.status)" variant="flat" style="margin-top: 5px">
+                  <v-chip
+                    :color="getColor(selectedKaryawan.status)"
+                    variant="flat"
+                    style="margin-top: 5px"
+                  >
                     {{ selectedKaryawan.status }}
                   </v-chip>
                 </v-list-item>
@@ -179,24 +209,27 @@
                     }}
                   </v-list-item>
                 </div>
-                <div style="display: flex" v-else-if="selectedKaryawan.status == 'Cuti' && selectedKaryawan.application.depart && selectedKaryawan.application.arrival">
+                <div
+                  style="display: flex"
+                  v-else-if="
+                    selectedKaryawan.status == 'Cuti' &&
+                    selectedKaryawan.application.depart &&
+                    selectedKaryawan.application.arrival
+                  "
+                >
                   <v-list-item>
-                    <v-list-item-subtitle>
-                      Keberangkatan
-                    </v-list-item-subtitle>
+                    <v-list-item-subtitle> Keberangkatan </v-list-item-subtitle>
                     {{ selectedKaryawan.application.depart }}
                   </v-list-item>
                   <v-list-item>
-                    <v-list-item-subtitle>
-                      Tujuan
-                    </v-list-item-subtitle>
+                    <v-list-item-subtitle> Tujuan </v-list-item-subtitle>
                     {{ selectedKaryawan.application.arrival }}
                   </v-list-item>
                 </div>
               </v-row>
             </div>
 
-            <div class="karyawan-actions" >
+            <div class="karyawan-actions">
               <v-row style="margin: 1rem" v-if="getApplicationStatus == 'Pending'">
                 <v-col cols="auto">
                   <v-btn> Pengajuan Disetujui </v-btn>
@@ -208,14 +241,20 @@
                   <v-btn> Edit Form </v-btn>
                 </v-col>
               </v-row>
-              <v-row style="margin : 1rem" v-else-if="selectedKaryawan.status == 'Cuti'">
-               <v-col cols="auto">
+              <v-row style="margin: 1rem" v-else-if="selectedKaryawan.status == 'Cuti'">
+                <v-col cols="auto">
                   <v-btn @click="openReturnDateDialog">
-                    {{ selectedKaryawan.end_contract ? 'Edit Return Date' :  'Set Return Date'}}
+                    {{ selectedKaryawan.end_contract ? 'Edit Return Date' : 'Set Return Date' }}
                   </v-btn>
-               </v-col>
+                </v-col>
               </v-row>
-              <v-row style="margin: 1rem" v-else-if="!selectedKaryawan.application_status && selectedKaryawan.status != 'Resign' || selectedKaryawan.status == 'Cut Off' ">
+              <v-row
+                style="margin: 1rem"
+                v-else-if="
+                  (!selectedKaryawan.application_status && selectedKaryawan.status != 'Resign') ||
+                  selectedKaryawan.status == 'Cut Off'
+                "
+              >
                 <v-col cols="auto">
                   <v-btn
                     @click="
@@ -229,7 +268,6 @@
                   </v-btn>
                 </v-col>
               </v-row>
-             
             </div>
           </v-sheet>
         </v-dialog>
@@ -303,182 +341,190 @@
               </template>
             </v-toolbar>
             <v-container>
-            <v-row dense>
-              <v-col>
-                <v-list-item-title>
-                  Pengajuan
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  <i> Apply </i> 
-                </v-list-item-subtitle>
-              </v-col>
-            </v-row> 
-            <v-form ref="editForm" lazy-validation>
               <v-row dense>
-                <v-radio-group 
+                <v-col>
+                  <v-list-item-title> Pengajuan </v-list-item-title>
+                  <v-list-item-subtitle>
+                    <i> Apply </i>
+                  </v-list-item-subtitle>
+                </v-col>
+              </v-row>
+              <v-form ref="editForm" lazy-validation>
+                <v-row dense>
+                  <v-radio-group
                     v-model="editFormData.application_type"
                     density="compact"
-                    style="margin-top: 10px;"
+                    style="margin-top: 10px"
                     inline
                   >
-                    <v-radio label="Kompensasi" value="Kompensasi" style="margin-right : 1rem" ></v-radio>
-                    <v-radio label="Cuti" value="Cuti" style="margin-right : 1rem" ></v-radio>
-                    <v-radio label="Resign" value="Resign" style="margin-right : 1rem" ></v-radio>
-                </v-radio-group>
-              </v-row>
-              
-              <v-row dense>
-                <v-col v-if="editFormData.application_type == 'Kompensasi'">
-                  <v-row dense>
-                    <v-col>
-                      <v-list-item-title> Mulai Kontrak </v-list-item-title>
-                      <v-list-item-subtitle>
-                        <i> Start Contract </i>
-                      </v-list-item-subtitle>
-                      <v-text-field 
-                        readonly 
-                        variant="underlined" 
-                        density="compact"
-                        v-model=editFormData.start_contract
+                    <v-radio
+                      label="Kompensasi"
+                      value="Kompensasi"
+                      style="margin-right: 1rem"
+                    ></v-radio>
+                    <v-radio label="Cuti" value="Cuti" style="margin-right: 1rem"></v-radio>
+                    <v-radio label="Resign" value="Resign" style="margin-right: 1rem"></v-radio>
+                  </v-radio-group>
+                </v-row>
+
+                <v-row dense>
+                  <v-col v-if="editFormData.application_type == 'Kompensasi'">
+                    <v-row dense>
+                      <v-col>
+                        <v-list-item-title> Mulai Kontrak </v-list-item-title>
+                        <v-list-item-subtitle>
+                          <i> Start Contract </i>
+                        </v-list-item-subtitle>
+                        <v-text-field
+                          readonly
+                          variant="underlined"
+                          density="compact"
+                          v-model="editFormData.start_contract"
+                        >
+                        </v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-list-item-title> Akhir Kontrak </v-list-item-title>
+                        <v-list-item-subtitle>
+                          <i> End Contract </i>
+                        </v-list-item-subtitle>
+                        <v-text-field
+                          readonly
+                          variant="underlined"
+                          density="compact"
+                          v-model="editFormData.end_contract"
+                        >
+                        </v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col v-else-if="editFormData.application_type == 'Cuti'">
+                    <v-row dense>
+                      <v-col v-click-outside="closeStartCutiDatePicker">
+                        <v-list-item-title>Tanggal Cuti</v-list-item-title>
+                        <v-list-item-subtitle> <i> Leave Date </i> </v-list-item-subtitle>
+                        <v-text-field
+                          v-model="editFormData.start_cuti"
+                          variant="underlined"
+                          density="compact"
+                          append-inner-icon="mdi-calendar"
+                          @click:appendInner="openStartCutiDatePicker"
+                          placeholder="DD/MM/YYYY"
+                          clearable
+                          required
+                          :rules="rules.applyRules"
+                        ></v-text-field>
+                        <VDatePicker
+                          v-model.string="editFormData.start_cuti"
+                          mode="date"
+                          @dayclick="closeStartCutiDatePicker"
+                          :masks="dateFormat"
+                          v-if="togglerHandler.isStartCutiDatePickerOpen"
+                        >
+                        </VDatePicker>
+                      </v-col>
+                      <v-col
+                        v-click-outside="closeEndCutiDatePicker"
+                        v-if="togglerHandler.isEndCuti"
                       >
-                        
-                      </v-text-field>
-                    </v-col>
-                    <v-col>
-                      <v-list-item-title> Akhir Kontrak </v-list-item-title>
-                      <v-list-item-subtitle>
-                        <i> End Contract </i>
-                      </v-list-item-subtitle>
-                      <v-text-field 
-                        readonly 
-                        variant="underlined" 
-                        density="compact"
-                        v-model="editFormData.end_contract"
-                      >
-                        
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-col>
-                <v-col v-else-if="editFormData.application_type == 'Cuti'">
-                  <v-row dense>
-                    <v-col v-click-outside="closeStartCutiDatePicker">
-                      <v-list-item-title>Tanggal Cuti</v-list-item-title>
-                      <v-list-item-subtitle> <i> Leave Date </i> </v-list-item-subtitle>
-                      <v-text-field
-                        v-model="editFormData.start_cuti"
-                        variant="underlined"
-                        density="compact"
-                        append-inner-icon="mdi-calendar"
-                        @click:appendInner="openStartCutiDatePicker"
-                        placeholder="DD/MM/YYYY"
-                        clearable
-                        required
-                        :rules="rules.applyRules"
-                      ></v-text-field>
-                      <VDatePicker
-                        v-model.string="editFormData.start_cuti"
-                        mode="date"
-                        @dayclick="closeStartCutiDatePicker"
-                        :masks="dateFormat"
-                        v-if="togglerHandler.isStartCutiDatePickerOpen"
-                      >
-                      </VDatePicker>
-                    </v-col>
-                    <v-col v-click-outside="closeEndCutiDatePicker" v-if="togglerHandler.isEndCuti">
-                      <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
-                      <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
-                      <v-text-field
-                        v-model="editFormData.end_cuti"
-                        variant="underlined"
-                        density="compact"
-                        append-inner-icon="mdi-calendar"
-                        @click:appendInner="openEndCutiDatePicker"
-                        placeholder="DD/MM/YYYY"
-                        clearable
-                        required
-                        :rules="rules.applyRules"
-                      ></v-text-field>
-                      <VDatePicker
-                        v-model.string="editFormData.end_cuti"
-                        mode="date"
-                        @dayclick="closeEndCutiDatePicker"
-                        :masks="dateFormat"
-                        :min-date="getDateObj(editFormData.start_cuti)"
-                        v-if="togglerHandler.isEndCutiDatePickerOpen"
-                      >
-                      </VDatePicker>
-                    
-                    </v-col>
-                    <v-col align-self="start">
-                      <v-checkbox label="Balik Cuti" v-model="togglerHandler.isEndCuti"></v-checkbox>
-                    </v-col>
-                  </v-row>
-                  <v-row dense>
-                    <v-col v-if="togglerHandler.isDepart">
-                      <v-list-item-title> Keberangkatan </v-list-item-title>
-                      <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
-                      <v-text-field 
-                        variant="underlined" 
-                        placeholder="Kendari" 
-                        v-model="editFormData.depart"
-                        :rules="rules.applyRules"
-                      > </v-text-field>
-                    </v-col>
-                    <v-col v-if="togglerHandler.isDepart">
-                      <v-list-item-title> Kedatangan </v-list-item-title>
-                      <v-list-item-subtitle> <i> Arrival </i>  </v-list-item-subtitle>
-                      <v-text-field 
-                        variant="underlined" 
-                        placeholder="Jakarta" 
-                        v-model="editFormData.arrival"
-                        :rules="rules.applyRules"
-                      > </v-text-field>
-                    </v-col>
-                    <v-col align-self="center">
-                      <v-checkbox label="Berangkat" v-model="togglerHandler.isDepart"></v-checkbox>
-                    </v-col>
-                  </v-row>
-                </v-col>
-                <v-col v-else-if="editFormData.application_type == 'Resign'">
-                  <v-row dense>
-                    <v-col cols="5" v-click-outside="closeResignDatePicker">
-                      <v-list-item-title>Tanggal Resign</v-list-item-title>
-                      <v-list-item-subtitle> <i> Resign Date </i> </v-list-item-subtitle>
-                      <v-text-field
-                        v-model="editFormData.resign_date"
-                        variant="underlined"
-                        density="compact"
-                        append-inner-icon="mdi-calendar"
-                        @click:appendInner="openResignDatePicker"
-                        placeholder="DD/MM/YYYY"
-                        clearable
-                        required
-                        :rules = "rules.applyRules"
-                      ></v-text-field>
-                      <VDatePicker
-                        v-model.string="editFormData.resign_date"
-                        mode="date"
-                        @dayclick="closeResignDatePicker"
-                        :masks="dateFormat"
-                        :min-date="new Date()"
-                        v-if="togglerHandler.isResignDatePickerOpen"
-                      >
-                      </VDatePicker>
-                    </v-col>
-                  </v-row>
-                </v-col>
-              </v-row>
-            </v-form>
+                        <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
+                        <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
+                        <v-text-field
+                          v-model="editFormData.end_cuti"
+                          variant="underlined"
+                          density="compact"
+                          append-inner-icon="mdi-calendar"
+                          @click:appendInner="openEndCutiDatePicker"
+                          placeholder="DD/MM/YYYY"
+                          clearable
+                          required
+                          :rules="rules.applyRules"
+                        ></v-text-field>
+                        <VDatePicker
+                          v-model.string="editFormData.end_cuti"
+                          mode="date"
+                          @dayclick="closeEndCutiDatePicker"
+                          :masks="dateFormat"
+                          :min-date="getDateObj(editFormData.start_cuti)"
+                          v-if="togglerHandler.isEndCutiDatePickerOpen"
+                        >
+                        </VDatePicker>
+                      </v-col>
+                      <v-col align-self="start">
+                        <v-checkbox
+                          label="Balik Cuti"
+                          v-model="togglerHandler.isEndCuti"
+                        ></v-checkbox>
+                      </v-col>
+                    </v-row>
+                    <v-row dense>
+                      <v-col v-if="togglerHandler.isDepart">
+                        <v-list-item-title> Keberangkatan </v-list-item-title>
+                        <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
+                        <v-text-field
+                          variant="underlined"
+                          placeholder="Kendari"
+                          v-model="editFormData.depart"
+                          :rules="rules.applyRules"
+                        >
+                        </v-text-field>
+                      </v-col>
+                      <v-col v-if="togglerHandler.isDepart">
+                        <v-list-item-title> Kedatangan </v-list-item-title>
+                        <v-list-item-subtitle> <i> Arrival </i> </v-list-item-subtitle>
+                        <v-text-field
+                          variant="underlined"
+                          placeholder="Jakarta"
+                          v-model="editFormData.arrival"
+                          :rules="rules.applyRules"
+                        >
+                        </v-text-field>
+                      </v-col>
+                      <v-col align-self="center">
+                        <v-checkbox
+                          label="Berangkat"
+                          v-model="togglerHandler.isDepart"
+                        ></v-checkbox>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col v-else-if="editFormData.application_type == 'Resign'">
+                    <v-row dense>
+                      <v-col cols="5" v-click-outside="closeResignDatePicker">
+                        <v-list-item-title>Tanggal Resign</v-list-item-title>
+                        <v-list-item-subtitle> <i> Resign Date </i> </v-list-item-subtitle>
+                        <v-text-field
+                          v-model="editFormData.resign_date"
+                          variant="underlined"
+                          density="compact"
+                          append-inner-icon="mdi-calendar"
+                          @click:appendInner="openResignDatePicker"
+                          placeholder="DD/MM/YYYY"
+                          clearable
+                          required
+                          :rules="rules.applyRules"
+                        ></v-text-field>
+                        <VDatePicker
+                          v-model.string="editFormData.resign_date"
+                          mode="date"
+                          @dayclick="closeResignDatePicker"
+                          :masks="dateFormat"
+                          :min-date="new Date()"
+                          v-if="togglerHandler.isResignDatePickerOpen"
+                        >
+                        </VDatePicker>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-form>
             </v-container>
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue-darken-1" variant="text" @click="closeEditPengajuanDialog">
                 Close
               </v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="editApplyForm">
-                Save
-              </v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="editApplyForm"> Save </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -495,47 +541,59 @@
             </v-toolbar>
             <v-container>
               <v-form ref="endCutiForm" lazy-validate>
-                <v-row dense>                    
-                    <v-col v-click-outside="closeEndCutiDatePicker">
-                      <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
-                      <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
-                      <v-text-field
-                        v-model="setReturnData.returnDate"
-                        variant="underlined"
-                        density="compact"
-                        append-inner-icon="mdi-calendar"
-                        @click:appendInner="openEndCutiDatePicker"
-                        placeholder="DD/MM/YYYY"
-                        clearable
-                        required
-                        :rules="rules.applyRules"
-                      ></v-text-field>
-                      <VDatePicker
-                        v-model.string="setReturnData.returnDate"
-                        mode="date"
-                        @dayclick="closeEndCutiDatePicker"
-                        :masks="dateFormat"
-                        :min-date="getDateObj(selectedKaryawan.start_contract)"
-                        v-if="togglerHandler.isEndCutiDatePickerOpen"
-                      >
-                      </VDatePicker>
-                    </v-col>
+                <v-row dense>
+                  <v-col v-click-outside="closeEndCutiDatePicker">
+                    <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
+                    <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
+                    <v-text-field
+                      v-model="setReturnData.returnDate"
+                      variant="underlined"
+                      density="compact"
+                      append-inner-icon="mdi-calendar"
+                      @click:appendInner="openEndCutiDatePicker"
+                      placeholder="DD/MM/YYYY"
+                      clearable
+                      required
+                      :rules="rules.applyRules"
+                    ></v-text-field>
+                    <VDatePicker
+                      v-model.string="setReturnData.returnDate"
+                      mode="date"
+                      @dayclick="closeEndCutiDatePicker"
+                      :masks="dateFormat"
+                      :min-date="getDateObj(selectedKaryawan.start_contract)"
+                      v-if="togglerHandler.isEndCutiDatePickerOpen"
+                    >
+                    </VDatePicker>
+                  </v-col>
                 </v-row>
                 <v-row dense v-if="selectedKaryawan.application.depart">
                   <v-col>
                     <v-list-item-title> Keberangkatan </v-list-item-title>
                     <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
-                    <v-text-field variant="underlined" placeholder="Jakarta" v-model="selectedKaryawan.application.arrival" readonly> </v-text-field>
+                    <v-text-field
+                      variant="underlined"
+                      placeholder="Jakarta"
+                      v-model="selectedKaryawan.application.arrival"
+                      readonly
+                    >
+                    </v-text-field>
                   </v-col>
                   <v-col>
                     <v-list-item-title> Kedatangan </v-list-item-title>
-                    <v-list-item-subtitle> <i> Arrival </i>  </v-list-item-subtitle>
-                    <v-text-field variant="underlined" placeholder="Kendari" v-model="selectedKaryawan.application.depart" readonly> </v-text-field>
+                    <v-list-item-subtitle> <i> Arrival </i> </v-list-item-subtitle>
+                    <v-text-field
+                      variant="underlined"
+                      placeholder="Kendari"
+                      v-model="selectedKaryawan.application.depart"
+                      readonly
+                    >
+                    </v-text-field>
                   </v-col>
                 </v-row>
               </v-form>
             </v-container>
-             <v-card-actions>
+            <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue-darken-1" variant="text" @click="closeReturnDateDialog">
                 Close
@@ -545,6 +603,16 @@
               </v-btn>
             </v-card-actions>
           </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="togglerHandler.isJoinDateFilterOpen" width="auto">
+          <v-date-picker v-model.range="joinDateRange">
+            <template #footer>
+              <v-btn style="background-color: var(--secondary); width : auto ; margin : 1rem" @click="clearJoinDateRange"> 
+                Clear 
+              </v-btn>
+            </template>
+          </v-date-picker>
         </v-dialog>
       </div>
     </div>
@@ -559,31 +627,36 @@ import { cloneDeep, clone } from 'lodash'
 
 import card_bg from '../../assets/crane_card_bg.jpg'
 
-import {karyawanMixin} from '../../mixins/karyawanMixin'
+import { karyawanMixin } from '../../mixins/karyawanMixin'
 </script>
 
 <script>
 export default {
-  mixins : [karyawanMixin],
+  mixins: [karyawanMixin],
   data: () => ({
-
-    togglerHandler : {
+    togglerHandler: {
       karyawanExpand: ref(false),
       isLogKaryawanOpen: ref(false),
       isEditPengajuanOpen: ref(false),
-      isReturnDateOpen : ref(false),
-      isStartCutiDatePickerOpen : ref(false),
-      isEndCutiDatePickerOpen : ref(false),
-      isResignDatePickerOpen : ref(false),
-      isEndCuti : ref(false),
-      isDepart : ref(false),
+      isReturnDateOpen: ref(false),
+      isStartCutiDatePickerOpen: ref(false),
+      isEndCutiDatePickerOpen: ref(false),
+      isResignDatePickerOpen: ref(false),
+      isEndCuti: ref(false),
+      isDepart: ref(false),
+      isJoinDateFilterOpen: ref(false)
     },
 
     selectedKaryawan: ref({}),
     editFormData: ref({}),
-    setReturnData : ref({}),
+    setReturnData: ref({}),
 
     search: ref(''),
+
+    joinDateRange: ref({
+      start: ref(null),
+      end: ref(null)
+    }),
 
     headers: [
       {
@@ -608,9 +681,9 @@ export default {
         key: 'site'
       },
       {
-        title: 'Akhir Kontrak / Akhir Cuti',
+        title: 'Tanggal Join',
         align: 'center',
-        key: 'end_contract',
+        key: 'join_date'
       },
       {
         title: 'Status',
@@ -618,10 +691,10 @@ export default {
         key: 'status'
       },
       {
-        title : 'Pengajuan',
-        align : 'center',
-        key : 'application_status'
-      },
+        title: 'Pengajuan',
+        align: 'center',
+        key: 'application_status'
+      }
     ],
 
     employees: [
@@ -638,15 +711,15 @@ export default {
         start_contract: '20/07/2023',
         end_contract: '20/01/2024',
         application_status: null,
-        application : {
-          application_type : null,
-          start_contract : null,
-          end_contract : null,
-          start_cuti : null,
-          end_cuti : null,
-          depart : null,
-          arrival : null,
-          resign_date : null,
+        application: {
+          application_type: null,
+          start_contract: null,
+          end_contract: null,
+          start_cuti: null,
+          end_cuti: null,
+          depart: null,
+          arrival: null,
+          resign_date: null
         }
       },
       {
@@ -656,22 +729,22 @@ export default {
         pob: 'Makassar',
         address: 'Jl. ',
         position: 'Operator Crane',
-        tonnage : '80',
+        tonnage: '80',
         site: 'PT',
         join_date: '19/10/2020',
         status: 'Close Project',
         start_contract: '13/03/2023',
         end_contract: '13/09/2023',
         application_status: -1,
-        application : {
-          application_type : 'Kompensasi',
-          start_contract : '14/09/2023',
-          end_contract : '14/03/2023',
-          start_cuti : null,
-          end_cuti : null,
-          depart : null,
-          arrival : null,
-          resign_date : null,
+        application: {
+          application_type: 'Kompensasi',
+          start_contract: '14/09/2023',
+          end_contract: '14/03/2023',
+          start_cuti: null,
+          end_cuti: null,
+          depart: null,
+          arrival: null,
+          resign_date: null
         }
       },
       {
@@ -687,15 +760,15 @@ export default {
         start_contract: '27/04/2023',
         end_contract: '27/10/2023',
         application_status: -1,
-        application : {
-          application_type : "Cuti",
-          start_contract : null,
-          end_contract : null,
-          start_cuti : "28/10/2023",
-          end_cuti : null,
-          depart : null,
-          arrival : null,
-          resign_date : null,
+        application: {
+          application_type: 'Cuti',
+          start_contract: null,
+          end_contract: null,
+          start_cuti: '28/10/2023',
+          end_cuti: null,
+          depart: null,
+          arrival: null,
+          resign_date: null
         }
       },
       {
@@ -710,16 +783,16 @@ export default {
         status: 'Cuti',
         start_contract: '27/04/2023',
         end_contract: null,
-        application_status : null,
-        application : {
-          application_type : null,
-          start_contract : null,
-          end_contract : null,
-          start_cuti : "27/04/2023",
-          end_cuti : null,
+        application_status: null,
+        application: {
+          application_type: null,
+          start_contract: null,
+          end_contract: null,
+          start_cuti: '27/04/2023',
+          end_cuti: null,
           depart: null,
-          arrival : null,
-          resign_date : null,
+          arrival: null,
+          resign_date: null
         }
       },
       {
@@ -735,15 +808,15 @@ export default {
         start_contract: '27/04/2023',
         end_contract: '10/05/2023',
         application_status: null,
-        application : {
-          application_type : null,
-          start_contract : null,
-          end_contract : null,
-          start_cuti : "20/10/2023",
-          end_cuti : "5/11/2023",
-          depart : "Kendari",
-          arrival : "Jakarta",
-          resign_date : null,
+        application: {
+          application_type: null,
+          start_contract: null,
+          end_contract: null,
+          start_cuti: '20/10/2023',
+          end_cuti: '5/11/2023',
+          depart: 'Kendari',
+          arrival: 'Jakarta',
+          resign_date: null
         }
       },
       {
@@ -759,17 +832,17 @@ export default {
         start_contract: '30/04/2023',
         end_contract: null,
         application_status: null,
-        application : {
-          application_type : null,
-          start_contract : null,
-          end_contract : null,
-          start_cuti : null,
-          end_cuti : null,
-          depart : null,
-          arrival : null,
-          resign_date : null,
+        application: {
+          application_type: null,
+          start_contract: null,
+          end_contract: null,
+          start_cuti: null,
+          end_cuti: null,
+          depart: null,
+          arrival: null,
+          resign_date: null
         }
-      },
+      }
     ],
 
     messages: [
@@ -792,10 +865,9 @@ export default {
       }
     ],
 
-    rules : {
-      applyRules: [(value) => !!value || '*Required'],
-    },
-
+    rules: {
+      applyRules: [(value) => !!value || '*Required']
+    }
   }),
   methods: {
     getColor(status) {
@@ -805,6 +877,13 @@ export default {
       else if (status == 'Resign') return 'black'
       else if (status == 'Cut Off') return 'brown'
       else return 'green'
+    },
+
+    // Clear Join Date Range
+    clearJoinDateRange(){
+      this.joinDateRange.start = null
+      this.joinDateRange.end = null
+      this.togglerHandler.isJoinDateFilterOpen = false
     },
 
     // Karyawan Details Dialog
@@ -830,11 +909,11 @@ export default {
 
     // Edit Pengajuan Handler
     openEditPengajuanDialog() {
-      this.editFormData = this.getCurrentApplication;
+      this.editFormData = this.getCurrentApplication
 
-      this.editFormData.start_contract = this.setStartContractDate;
-      this.editFormData.end_contract = this.setEndContractDate;
-     
+      this.editFormData.start_contract = this.setStartContractDate
+      this.editFormData.end_contract = this.setEndContractDate
+
       this.togglerHandler.isEditPengajuanOpen = true
     },
     closeEditPengajuanDialog() {
@@ -842,49 +921,48 @@ export default {
     },
 
     // Add Return Date Handler
-    openReturnDateDialog(){
+    openReturnDateDialog() {
       this.setReturnData.returnDate = this.getReturnDate
       this.togglerHandler.isReturnDateOpen = true
     },
-    closeReturnDateDialog(){
+    closeReturnDateDialog() {
       this.togglerHandler.isReturnDateOpen = false
     },
 
-
     // Date Picker Handler
-    openEndCutiDatePicker(){
-      try{
-        if(this.editFormData.start_cuti){
+    openEndCutiDatePicker() {
+      try {
+        if (this.editFormData.start_cuti) {
           this.getDateObj(this.editFormData.start_cuti)
           this.togglerHandler.isEndCutiDatePickerOpen = true
-        }else{
-          throw new Error("Tanggal Cuti is Required")
+        } else {
+          throw new Error('Tanggal Cuti is Required')
         }
-      }catch(err){
+      } catch (err) {
         alert(err.message)
       }
     },
 
-    closeEndCutiDatePicker(){
+    closeEndCutiDatePicker() {
       this.togglerHandler.isEndCutiDatePickerOpen = false
     },
 
-    openStartCutiDatePicker(){
+    openStartCutiDatePicker() {
       this.togglerHandler.isStartCutiDatePickerOpen = true
     },
 
-    closeStartCutiDatePicker(){
+    closeStartCutiDatePicker() {
       this.togglerHandler.isStartCutiDatePickerOpen = false
     },
 
-    openResignDatePicker(){
+    openResignDatePicker() {
       this.togglerHandler.isResignDatePickerOpen = true
     },
 
-    closeResignDatePicker(){
+    closeResignDatePicker() {
       this.togglerHandler.isResignDatePickerOpen = false
     },
-    
+
     // Get Log Dates to filter the log message
     getLogDates(messages) {
       const uniqueDates = [...new Set(messages.map((message) => message.date))]
@@ -900,35 +978,55 @@ export default {
     },
 
     // Submit Edit Form
-    async editApplyForm(){
-      const {valid} = await this.$refs.editForm.validate()
-      if(valid){
-        console.log("Edited")
+    async editApplyForm() {
+      const { valid } = await this.$refs.editForm.validate()
+      if (valid) {
+        console.log('Edited')
         console.log(this.editFormData)
       }
     }
   },
- 
-  computed : {
+
+  computed: {
+    // Filter the Employees
+    filteredEmployees(){
+      const start = this.joinDateRange.start
+      const end = this.joinDateRange.end
+      if(start && end){
+        return this.employees.filter((employee) =>{
+          const joinDate = this.getDateObj(employee.join_date)
+          return joinDate >= start && joinDate <= end;
+        })
+      }
+      return this.employees
+    },
+
     // Set Up Form Data in Edit Application
-    getCurrentApplication(){
-      if(this.selectedKaryawan){
+    getCurrentApplication() {
+      if (this.selectedKaryawan) {
         const karyawan = this.selectedKaryawan
-        if(karyawan && karyawan.application_status){
+        if (karyawan && karyawan.application_status) {
           return cloneDeep(karyawan.application)
         }
       }
       return null
     },
     // Set Up return date (Cuti)
-    getReturnDate(){
-      if (this.selectedKaryawan.end_contract && this.selectedKaryawan.status == 'Cuti'){
+    getReturnDate() {
+      if (this.selectedKaryawan.end_contract && this.selectedKaryawan.status == 'Cuti') {
         return clone(this.selectedKaryawan.end_contract)
       }
       return null
     },
 
-
+    getJoinDateRange() {
+      if(this.joinDateRange.start && this.joinDateRange.end){    
+        return `${moment(this.joinDateRange.start).format('DD/MM/YYYY')} - ${moment(
+          this.joinDateRange.end
+        ).format('DD/MM/YYYY')}`
+      }
+      return null
+    }
   }
 }
 </script>
