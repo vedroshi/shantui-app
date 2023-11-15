@@ -37,7 +37,6 @@
             @click="this.$router.push('karyawan/create')"
           >
             <span class="material-symbols-outlined"> add </span>
-            Add Employee
           </v-btn>
         </v-col>
       </v-row>
@@ -634,6 +633,7 @@ import { karyawanMixin } from '../../mixins/karyawanMixin'
 export default {
   mixins: [karyawanMixin],
   data: () => ({
+    
     togglerHandler: {
       karyawanExpand: ref(false),
       isLogKaryawanOpen: ref(false),
@@ -903,6 +903,7 @@ export default {
     openLogKaryawanDialog() {
       this.togglerHandler.isLogKaryawanOpen = true
     },
+
     closeLogKaryawanDialog() {
       this.togglerHandler.isLogKaryawanOpen = false
     },
@@ -916,6 +917,7 @@ export default {
 
       this.togglerHandler.isEditPengajuanOpen = true
     },
+
     closeEditPengajuanDialog() {
       this.togglerHandler.isEditPengajuanOpen = false
     },
@@ -925,6 +927,7 @@ export default {
       this.setReturnData.returnDate = this.getReturnDate
       this.togglerHandler.isReturnDateOpen = true
     },
+
     closeReturnDateDialog() {
       this.togglerHandler.isReturnDateOpen = false
     },
@@ -986,7 +989,7 @@ export default {
       }
     }
   },
-
+ 
   computed: {
     // Filter the Employees
     filteredEmployees(){
@@ -1011,6 +1014,7 @@ export default {
       }
       return null
     },
+
     // Set Up return date (Cuti)
     getReturnDate() {
       if (this.selectedKaryawan.end_contract && this.selectedKaryawan.status == 'Cuti') {

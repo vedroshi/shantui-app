@@ -10,7 +10,7 @@
             <v-list-item-title>NIK</v-list-item-title>
             <v-list-item-subtitle> <i> Identity Number </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.nik"
+              v-model="formData.NIK"
               variant="underlined"
               density="compact"
               :rules="nikRules"
@@ -23,7 +23,7 @@
             <v-list-item-title>Nama</v-list-item-title>
             <v-list-item-subtitle> <i> Name </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.name"
+              v-model="formData.Name"
               variant="underlined"
               density="compact"
               type="text"
@@ -37,7 +37,7 @@
             <v-list-item-title>Tempat Lahir</v-list-item-title>
             <v-list-item-subtitle> <i> Place of Birth </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.pob"
+              v-model="formData.POB"
               variant="underlined"
               density="compact"
               :rules="pobRules"
@@ -48,7 +48,7 @@
             <v-list-item-title>Tanggal Lahir</v-list-item-title>
             <v-list-item-subtitle> <i> Date of Birth </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.dob"
+              v-model="formData.DOB"
               variant="underlined"
               density="compact"
               append-inner-icon="mdi-calendar"
@@ -59,7 +59,7 @@
               :rules="dobRules"
             ></v-text-field>
             <VDatePicker
-              v-model.string="formData.dob"
+              v-model.string="formData.DOB"
               mode="date"
               @dayclick="closeDobDatePicker"
               :masks="dateFormat"
@@ -74,7 +74,7 @@
             <v-list-item-title>Alamat</v-list-item-title>
             <v-list-item-subtitle> <i> Address </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.address"
+              v-model="formData.Address.Address"
               variant="underlined"
               density="compact"
               type="text"
@@ -86,7 +86,7 @@
             <v-list-item-title>RT</v-list-item-title>
             <v-list-item-subtitle> <i> RT </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.rt"
+              v-model="formData.Address.RT"
               variant="underlined"
               density="compact"
               type="text"
@@ -96,7 +96,7 @@
             <v-list-item-title>RW</v-list-item-title>
             <v-list-item-subtitle> <i> RW </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.rw"
+              v-model="formData.Address.RW"
               variant="underlined"
               density="compact"
               type="text"
@@ -106,7 +106,7 @@
             <v-list-item-title>Kecamatan</v-list-item-title>
             <v-list-item-subtitle> <i> Subdistrict </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.subdistrict"
+              v-model="formData.Address.Subdistrict"
               variant="underlined"
               density="compact"
               type="text"
@@ -116,7 +116,7 @@
             <v-list-item-title>Kelurahan</v-list-item-title>
             <v-list-item-subtitle> <i> Village </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.village"
+              v-model="formData.Address.Village"
               variant="underlined"
               density="compact"
               type="text"
@@ -126,7 +126,7 @@
             <v-list-item-title>Provinsi</v-list-item-title>
             <v-list-item-subtitle> <i> Province </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.province"
+              v-model="formData.Address.Province"
               variant="underlined"
               density="compact"
               type="text"
@@ -138,7 +138,7 @@
             <v-list-item-title> Agama </v-list-item-title>
             <v-list-item-subtitle> <i> Religion </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.religion"
+              v-model="formData.Religion"
               :rules="religionRules"
               variant="underlined"
               density="compact"
@@ -151,11 +151,12 @@
             <v-list-item-title> Jabatan </v-list-item-title>
             <v-list-item-subtitle> <i> Position </i> </v-list-item-subtitle>
             <v-combobox
-              v-model="formData.selectedPosition"
+              v-model="selectedPosition"
               label="Select a Position"
               density="compact"
               variant="underlined"
               :items="positionItems"
+              item-value="position"
               item-title="position"
               single-line
               clearable
@@ -164,19 +165,14 @@
             >
             </v-combobox>
           </v-col>
-          <v-col
-            cols="3"
-            v-if="
-              formData.selectedPosition && formData.selectedPosition.position === 'Operator Crane'
-            "
-          >
+          <v-col cols="3" v-if="selectedPosition && selectedPosition.tonnage">
             <v-list-item-title> Tonase </v-list-item-title>
             <v-list-item-subtitle> <i> Tonnage </i> </v-list-item-subtitle>
             <v-combobox
-              v-model="formData.selectedPosition.selectedTonnage"
+              v-model="formData.Position.Tonnage"
               label="Select a Tonnage"
               density="compact"
-              :items="positionItems[0].tonnage"
+              :items="selectedPosition.tonnage"
               single-line
               variant="underlined"
               :rules="tonnageRules"
@@ -189,7 +185,7 @@
             <v-list-item-title>Tanggal Join</v-list-item-title>
             <v-list-item-subtitle> <i> Join Date </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.join_date"
+              v-model="formData.Join_Date"
               variant="underlined"
               density="compact"
               append-inner-icon="mdi-calendar"
@@ -197,9 +193,10 @@
               placeholder="DD/MM/YYYY"
               clearable
               required
+              :rules="joinRules"
             ></v-text-field>
             <VDatePicker
-              v-model.string="formData.join_date"
+              v-model.string="formData.Join_Date"
               mode="date"
               @dayclick="closeJoinDatePicker"
               :masks="dateFormat"
@@ -209,10 +206,20 @@
             </VDatePicker>
           </v-col>
           <v-col cols="3">
+            <v-list-item-title>Perusahaan</v-list-item-title>
+            <v-list-item-subtitle> <i> Company </i> </v-list-item-subtitle>
+            <v-text-field
+              v-model="formData.Company.Name"
+              variant="underlined"
+              density="compact"
+              :rules="companyRules"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3">
             <v-list-item-title>Penempatan</v-list-item-title>
             <v-list-item-subtitle> <i> Site </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.site"
+              v-model="formData.Company.Site"
               variant="underlined"
               density="compact"
               :rules="siteRules"
@@ -228,7 +235,8 @@
               label="Upload KTP"
               prepend-icon="mdi-card-account-details-outline"
               variant="underlined"
-              v-model="formData.ktp"
+              show-size
+              v-model="formData.KTP"
               required
             ></v-file-input>
           </v-col>
@@ -240,8 +248,25 @@
         </v-row>
       </v-form>
     </div>
-    <v-snackbar v-model="isSnackbarOpen" color="success" bottom :timeout="2000">
-      Karyawan is Added
+    <v-dialog v-model="addKaryawanProgressOpen" width="300" persistent align="center" justify="center" max-height="500">
+      <v-card style="padding : 2rem">
+        <v-row align="center" justify="center">
+          <v-col dense style>
+            <v-card-title class="mb-5"> Adding Karyawan </v-card-title>
+
+            <v-progress-circular
+              color="dark-blue"
+              indeterminate
+              :size="70"
+              :width="7"
+            ></v-progress-circular>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbarAttribute.isSnackbarOpen" :color="snackbarAttribute.isSuccess ? 'success' : 'red'" bottom :timeout="2000">
+      {{snackbarAttribute.message}}
       <template v-slot:actions>
         <v-btn variant="text" @click="isSnackbarOpen = false"> Close </v-btn>
       </template>
@@ -252,17 +277,27 @@
 <script setup>
 import { ref } from 'vue'
 import moment from 'moment'
-import {karyawanMixin} from '../../mixins/karyawanMixin'
+import axios from 'axios'
+import { cloneDeep } from 'lodash'
+
+import { karyawanMixin } from '../../mixins/karyawanMixin'
 </script>
 
 <script>
 export default {
-  mixins : [karyawanMixin],
+  mixins: [karyawanMixin],
   data: () => ({
     isDobDatePickerOpen: ref(false),
     isJoinDatePickerOpen: ref(false),
 
-    isSnackbarOpen: ref(false),
+    addKaryawanProgressOpen: ref(false),
+    snackbarAttribute: {
+      isSnackbarOpen : ref(false),
+      isSuccess : ref(null),
+      message : ref(null),
+    },
+
+    selectedPosition: ref(null),
 
     positionItems: [
       {
@@ -297,35 +332,44 @@ export default {
     nameRules: [(value) => !!value || 'Name is Required'],
     uploadKTPRules: [
       (value) => !!value || 'KTP is Required',
-      (value) => (value && value[0].size < 2000000) || 'Avatar size should be less than 2 MB!'
+      (value) => (value && value[0].size < 2000000) || 'KTP image size should be less than 2 MB!'
     ],
     pobRules: [(value) => !!value || 'Place of Birth is Required'],
     dobRules: [(value) => !!value || 'Date of Birth is Required'],
     addressRules: [(value) => !!value || 'Address is Required'],
     religionRules: [(value) => !!value || 'Religion is Required'],
+    joinRules: [(value) => !!value || 'Join Date is Required'],
     siteRules: [(value) => !!value || 'Site is Required'],
+    companyRules: [(value) => !!value || 'Company is Required'],
     positionRules: [(value) => (!!value && !!value.position) || 'Position is Required'],
-    tonnageRules: [(value) => (!!value) || 'Tonnage is Required'],
+    tonnageRules: [(value) => !!value || 'Tonnage is Required'],
 
-    formData: { 
-      nik: ref(null),
-      name: ref(null),
-      pob: ref(null),
-      dob: ref(null),
-      address: ref(null),
-      rt: ref(null),
-      rw: ref(null),
-      village: ref(null),
-      subdistrict: ref(null),
-      province : ref(null),
-      join_date: ref(moment(new Date()).format('DD/MM/YYYY')),
-      religion: ref(null),
-      selectedPosition: ref(null),
-      site: ref(null),
-      ktp: ref(null)
+    formData: {
+      NIK: ref(null),
+      Name: ref(null),
+      POB: ref(null),
+      DOB: ref(null),
+      Address: {
+        Address: ref(null),
+        RT: ref(null),
+        RW: ref(null),
+        Village: ref(null),
+        Subdistrict: ref(null),
+        Province: ref(null)
+      },
+      Join_Date: ref(moment(new Date()).format('DD/MM/YYYY')),
+      Religion: ref(null),
+      Position: {
+        Name: ref(null),
+        Tonnage: ref(null)
+      },
+      Company: {
+        Name: ref(null),
+        Site: ref(null)
+      },
+      KTP: ref(null)
     }
   }),
-
   methods: {
     openDobDatePicker() {
       this.isDobDatePickerOpen = true
@@ -343,12 +387,46 @@ export default {
       this.isJoinDatePickerOpen = false
     },
 
+    openSnackbar(response, isSuccess){
+      this.addKaryawanProgressOpen = false
+      this.snackbarAttribute.isSnackbarOpen = true
+      this.snackbarAttribute.isSuccess = isSuccess
+      this.snackbarAttribute.message = response.data.message
+    },
+
     async addKaryawan() {
       const { valid } = await this.$refs.form.validate()
+      
       if (valid) {
-        this.isSnackbarOpen = true
-        console.log(this.formData)
+        this.addKaryawanProgressOpen = true
+        // set Position Name
+        const newKaryawanData = cloneDeep(this.formData)
+
+        newKaryawanData.Position.Name = this.setPositionName
+        newKaryawanData.DOB =  moment(newKaryawanData.DOB, 'DD/MM/YYYY').format('YYYY-MM-DD');
+        newKaryawanData.Join_Date = moment(newKaryawanData.Join_Date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+
+        newKaryawanData.KTP = newKaryawanData.KTP[0]
+
+        await axios.post(`${this.karyawanURL}/karyawan/create`, newKaryawanData, {
+            headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        }).then((response)=>{
+          if(response.status == 200)
+            this.openSnackbar(response, true)
+            this.$refs.form.reset();
+        }).catch((error)=>{
+          this.openSnackbar(error.response, false)
+          console.log(error)
+        })
       }
+    }
+  },
+  computed: {
+    setPositionName() {
+      const positionName = this.selectedPosition.position
+      return positionName
     }
   }
 }
@@ -367,7 +445,6 @@ $defaultSpacing: 1rem;
 
   & .karyawan-form-content {
     @apply my-3;
-   
   }
 }
 </style>

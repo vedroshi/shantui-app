@@ -4,6 +4,7 @@ import {ref} from 'vue';
 export const karyawanMixin = {
     data(){
         return{
+            karyawanURL : this.$store.state.karyawanURL,
             selectedKaryawan : this.$store.state.selectedKaryawan,
             applicationStatus : {
                 1 : "Accepted",

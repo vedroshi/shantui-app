@@ -1,9 +1,12 @@
 import {createStore} from 'vuex';
 
+const KaryawanAPIEndpoint = import.meta.env.VITE_APP_KARYAWAN_ENDPOINT
+
 const store = createStore({
     state: {
       // Your application's global state goes here
-      selectedKaryawan : {}
+      selectedKaryawan : {},
+      karyawanURL : KaryawanAPIEndpoint
     },
     mutations: {
       // Mutations to modify the state go here
@@ -18,7 +21,8 @@ const store = createStore({
       // Getters to retrieve and compute state go here
       getSelectedKaryawan(){
         return this.selectedKaryawan;
-      }
+      },
+     
     },
   });
   
