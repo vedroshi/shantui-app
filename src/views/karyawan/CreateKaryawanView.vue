@@ -17,8 +17,6 @@
               required
             ></v-text-field>
           </v-col>
-        </v-row>
-        <v-row dense>
           <v-col cols="3">
             <v-list-item-title>Nama</v-list-item-title>
             <v-list-item-subtitle> <i> Name </i> </v-list-item-subtitle>
@@ -70,66 +68,16 @@
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col cols="3">
+          <v-col>
             <v-list-item-title>Alamat</v-list-item-title>
             <v-list-item-subtitle> <i> Address </i> </v-list-item-subtitle>
             <v-text-field
-              v-model="formData.Address.Address"
+              v-model="formData.Address"
               variant="underlined"
               density="compact"
               type="text"
               :rules="addressRules"
               required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="1">
-            <v-list-item-title>RT</v-list-item-title>
-            <v-list-item-subtitle> <i> RT </i> </v-list-item-subtitle>
-            <v-text-field
-              v-model="formData.Address.RT"
-              variant="underlined"
-              density="compact"
-              type="text"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="1">
-            <v-list-item-title>RW</v-list-item-title>
-            <v-list-item-subtitle> <i> RW </i> </v-list-item-subtitle>
-            <v-text-field
-              v-model="formData.Address.RW"
-              variant="underlined"
-              density="compact"
-              type="text"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-list-item-title>Kecamatan</v-list-item-title>
-            <v-list-item-subtitle> <i> Subdistrict </i> </v-list-item-subtitle>
-            <v-text-field
-              v-model="formData.Address.Subdistrict"
-              variant="underlined"
-              density="compact"
-              type="text"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-list-item-title>Kelurahan</v-list-item-title>
-            <v-list-item-subtitle> <i> Village </i> </v-list-item-subtitle>
-            <v-text-field
-              v-model="formData.Address.Village"
-              variant="underlined"
-              density="compact"
-              type="text"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-list-item-title>Provinsi</v-list-item-title>
-            <v-list-item-subtitle> <i> Province </i> </v-list-item-subtitle>
-            <v-text-field
-              v-model="formData.Address.Province"
-              variant="underlined"
-              density="compact"
-              type="text"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -349,14 +297,7 @@ export default {
       Name: ref(null),
       POB: ref(null),
       DOB: ref(null),
-      Address: {
-        Address: ref(null),
-        RT: ref(null),
-        RW: ref(null),
-        Village: ref(null),
-        Subdistrict: ref(null),
-        Province: ref(null)
-      },
+      Address: ref(null),
       Join_Date: ref(moment(new Date()).format('DD/MM/YYYY')),
       Religion: ref(null),
       Position: {

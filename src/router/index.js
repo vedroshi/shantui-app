@@ -50,7 +50,7 @@ const router = createRouter({
             const selectedKaryawan = store.state.selectedKaryawan
             const queryName = to.query.name;
 
-            if (!selectedKaryawan || selectedKaryawan.name !== queryName) {
+            if (!selectedKaryawan || selectedKaryawan.Name !== queryName) {
               // If the conditions are not met, prevent access to the route
               next({name : 'KaryawanList'})
             } else {

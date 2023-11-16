@@ -49,32 +49,31 @@
           :search="search"
           class="elavation-1"
           density="compact"
-          item-key="nik"
+          item-key="NIK"
           height="70vh"
           @click:row="expandKaryawanDialog"
           clearable
           hover
         >
-          <template v-slot:[`item.join_date`]="{ value }">
+          <template v-slot:[`item.Join_Date`]="{ value }">
             {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
 
-          <template v-slot:[`item.status`]="{ value }">
+          <template v-slot:[`item.Status.Status`]="{ value }">
             <v-chip :color="getColor(value)" variant="flat" style="margin: 5px">
               {{ value }}
             </v-chip>
           </template>
-          <template v-slot:[`item.application_status`]="{ value, item }">
+          <template v-slot:[`item.Application.Application_Status`]="{ value, item }">
             {{
               value
-                ? `Ajukan ${item.application.application_type} (${this.applicationStatus[value]})`
-                : item.status == 'Cuti' || item.status == 'Resign' || item.status == 'Cut Off'
-                ? item.status
+                ? `Ajukan ${item.Application.Application_Type} (${this.applicationStatus[value]})`
+                : item.Status.Status == 'Cuti' || item.Status.Status == 'Resign' || item.Status.Status == 'Cut Off'
+                ? item.Status.Status
                 : 'Belum Ajukan Form'
             }}
           </template>
         </v-data-table>
-
         <!-- Karyawan Details Dialog  -->
         <v-dialog
           v-model="togglerHandler.karyawanExpand"
@@ -87,7 +86,7 @@
             <v-btn icon dark @click="shrinkKaryawanDialog">
               <span class="material-symbols-outlined"> close </span>
             </v-btn>
-            <v-toolbar-title>{{ selectedKaryawan.name }}</v-toolbar-title>
+            <v-toolbar-title>{{ selectedKaryawan.Name }}</v-toolbar-title>
           </v-toolbar>
           <v-sheet class="karyawan-details">
             <v-row style="margin: 1rem">
@@ -98,25 +97,25 @@
                 <v-row>
                   <v-list-item>
                     <v-list-item-subtitle>NIK</v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.nik }}</v-list-item-title>
+                    <v-list-item-title>{{ selectedKaryawan.NIK }}</v-list-item-title>
                   </v-list-item>
                 </v-row>
                 <v-row>
                   <v-list-item>
                     <v-list-item-subtitle>Nama</v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.name }}</v-list-item-title>
+                    <v-list-item-title>{{ selectedKaryawan.Name }}</v-list-item-title>
                   </v-list-item>
                 </v-row>
                 <v-row>
                   <v-list-item>
                     <v-list-item-subtitle>Posisi</v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.position }}</v-list-item-title>
+                    <v-list-item-title>{{ selectedKaryawan.Position.Name }}</v-list-item-title>
                   </v-list-item>
-                  <div v-if="selectedKaryawan.position == 'Operator Crane'">
+                  <div v-if="selectedKaryawan.Position.Tonnage">
                     <v-list-item>
                       <v-list-item-subtitle>Tonase</v-list-item-subtitle>
                       <v-list-item-title>{{
-                        selectedKaryawan.tonnage ? `${selectedKaryawan.tonnage} T` : '-'
+                        selectedKaryawan.Position.Tonnage
                       }}</v-list-item-title>
                     </v-list-item>
                   </div>
@@ -142,23 +141,23 @@
               <v-list-item>
                 <v-list-item-subtitle>Tempat, Tanggal Lahir</v-list-item-subtitle>
                 <v-list-item-title
-                  >{{ selectedKaryawan.pob }}, {{ selectedKaryawan.dob }}</v-list-item-title
+                  >{{ selectedKaryawan.POB }}, {{ selectedKaryawan.DOB }}</v-list-item-title
                 >
               </v-list-item>
 
               <v-list-item>
                 <v-list-item-subtitle>Alamat</v-list-item-subtitle>
-                <v-list-item-title>{{ selectedKaryawan.address }}</v-list-item-title>
+                <v-list-item-title>{{ selectedKaryawan.Address }}</v-list-item-title>
               </v-list-item>
 
               <v-list-item>
                 <v-list-item-subtitle>Penempatan</v-list-item-subtitle>
-                <v-list-item-title>{{ selectedKaryawan.site }}</v-list-item-title>
+                <v-list-item-title>{{ selectedKaryawan.Company.Site.Name }}</v-list-item-title>
               </v-list-item>
 
               <v-list-item>
-                <v-list-item-subtitle>Join Date</v-list-item-subtitle>
-                <v-list-item-title>{{ selectedKaryawan.join_date }}</v-list-item-title>
+                <v-list-item-subtitle>Tanggal Join</v-list-item-subtitle>
+                <v-list-item-title>{{ selectedKaryawan.Join_Date }}</v-list-item-title>
               </v-list-item>
 
               <v-row align="center" style="margin: 0.05rem">
@@ -166,21 +165,21 @@
                   <v-list-item-subtitle
                     >Mulai
                     {{
-                      selectedKaryawan.status == 'Cuti' ? 'Cuti' : 'Kontrak'
+                      selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak'
                     }}</v-list-item-subtitle
                   >
-                  <v-list-item-title>{{ selectedKaryawan.start_contract }}</v-list-item-title>
+                  <v-list-item-title>{{ selectedKaryawan.Status.Start }}</v-list-item-title>
                 </v-list-item>
                 <div
-                  v-if="selectedKaryawan.end_contract"
+                  v-if="selectedKaryawan.Status.End"
                   style="display: flex; align-items: center"
                 >
                   Sampai
                   <v-list-item>
                     <v-list-item-subtitle
-                      >Akhir {{ selectedKaryawan.status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
+                      >Akhir {{ selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
                     </v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.end_contract }}</v-list-item-title>
+                    <v-list-item-title>{{ selectedKaryawan.Status.End }}</v-list-item-title>
                   </v-list-item>
                 </div>
               </v-row>
@@ -189,21 +188,21 @@
                 <v-list-item>
                   <v-list-item-subtitle>Status</v-list-item-subtitle>
                   <v-chip
-                    :color="getColor(selectedKaryawan.status)"
+                    :color="getColor(selectedKaryawan.Status.Status)"
                     variant="flat"
                     style="margin-top: 5px"
                   >
-                    {{ selectedKaryawan.status }}
+                    {{ selectedKaryawan.Status.Status }}
                   </v-chip>
                 </v-list-item>
 
-                <div v-if="selectedKaryawan.status != 'Cuti'">
+                <div v-if="selectedKaryawan.Status.Status != 'Cuti'">
                   <v-list-item>
                     <v-list-item-subtitle>Status Pengajuan</v-list-item-subtitle>
                     {{
-                      selectedKaryawan.application.application_type &&
-                      selectedKaryawan.application_status
-                        ? `Ajukan ${selectedKaryawan.application.application_type} (${this.getApplicationStatus})`
+                      selectedKaryawan.Application.Application_Type &&
+                      selectedKaryawan.Application_Status
+                        ? `Ajukan ${selectedKaryawan.Application.Application_Type} (${this.getApplicationStatus})`
                         : '-'
                     }}
                   </v-list-item>
@@ -211,18 +210,18 @@
                 <div
                   style="display: flex"
                   v-else-if="
-                    selectedKaryawan.status == 'Cuti' &&
-                    selectedKaryawan.application.depart &&
-                    selectedKaryawan.application.arrival
+                    selectedKaryawan.Status.Status == 'Cuti' &&
+                    selectedKaryawan.Application.Depart &&
+                    selectedKaryawan.Application.Arrival
                   "
                 >
                   <v-list-item>
                     <v-list-item-subtitle> Keberangkatan </v-list-item-subtitle>
-                    {{ selectedKaryawan.application.depart }}
+                    {{ selectedKaryawan.Application.Depart }}
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-subtitle> Tujuan </v-list-item-subtitle>
-                    {{ selectedKaryawan.application.arrival }}
+                    {{ selectedKaryawan.Application.Arrival }}
                   </v-list-item>
                 </div>
               </v-row>
@@ -240,18 +239,18 @@
                   <v-btn> Edit Form </v-btn>
                 </v-col>
               </v-row>
-              <v-row style="margin: 1rem" v-else-if="selectedKaryawan.status == 'Cuti'">
+              <v-row style="margin: 1rem" v-else-if="selectedKaryawan.Status.Status == 'Cuti'">
                 <v-col cols="auto">
                   <v-btn @click="openReturnDateDialog">
-                    {{ selectedKaryawan.end_contract ? 'Edit Return Date' : 'Set Return Date' }}
+                    {{ selectedKaryawan.Status.End ? 'Edit Return Date' : 'Set Return Date' }}
                   </v-btn>
                 </v-col>
               </v-row>
               <v-row
                 style="margin: 1rem"
                 v-else-if="
-                  (!selectedKaryawan.application_status && selectedKaryawan.status != 'Resign') ||
-                  selectedKaryawan.status == 'Cut Off'
+                  (!selectedKaryawan.Application.Application_Status && selectedKaryawan.Status.Status != 'Resign') ||
+                  selectedKaryawan.Status.Status == 'Cut Off'
                 "
               >
                 <v-col cols="auto">
@@ -259,7 +258,7 @@
                     @click="
                       this.$router.push({
                         name: 'Pengajuan',
-                        query: { name: selectedKaryawan.name }
+                        query: { name: selectedKaryawan.Name }
                       })
                     "
                   >
@@ -290,12 +289,12 @@
               >
                 <v-row dense>
                   <v-col>
-                    <b> Name : {{ selectedKaryawan.name }} </b>
+                    <b> Name : {{ selectedKaryawan.Name }} </b>
                   </v-col>
                 </v-row>
                 <v-row dense>
                   <v-col>
-                    <b> Position : {{ selectedKaryawan.position }} </b>
+                    <b> Position : {{ selectedKaryawan.Position.Name }} </b>
                   </v-col>
                 </v-row>
               </v-card>
@@ -329,6 +328,7 @@
           </v-card>
         </v-dialog>
 
+        <!-- Edit Application Dialog -->
         <v-dialog v-model="togglerHandler.isEditPengajuanOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
@@ -351,7 +351,7 @@
               <v-form ref="editForm" lazy-validation>
                 <v-row dense>
                   <v-radio-group
-                    v-model="editFormData.application_type"
+                    v-model="editFormData.Application_Type"
                     density="compact"
                     style="margin-top: 10px"
                     inline
@@ -367,7 +367,7 @@
                 </v-row>
 
                 <v-row dense>
-                  <v-col v-if="editFormData.application_type == 'Kompensasi'">
+                  <v-col v-if="editFormData.Application_Type == 'Kompensasi'">
                     <v-row dense>
                       <v-col>
                         <v-list-item-title> Mulai Kontrak </v-list-item-title>
@@ -378,7 +378,7 @@
                           readonly
                           variant="underlined"
                           density="compact"
-                          v-model="editFormData.start_contract"
+                          v-model="editFormData.Start_Contract"
                         >
                         </v-text-field>
                       </v-col>
@@ -391,19 +391,19 @@
                           readonly
                           variant="underlined"
                           density="compact"
-                          v-model="editFormData.end_contract"
+                          v-model="editFormData.End_Contract"
                         >
                         </v-text-field>
                       </v-col>
                     </v-row>
                   </v-col>
-                  <v-col v-else-if="editFormData.application_type == 'Cuti'">
+                  <v-col v-else-if="editFormData.Application_Type == 'Cuti'">
                     <v-row dense>
                       <v-col v-click-outside="closeStartCutiDatePicker">
                         <v-list-item-title>Tanggal Cuti</v-list-item-title>
                         <v-list-item-subtitle> <i> Leave Date </i> </v-list-item-subtitle>
                         <v-text-field
-                          v-model="editFormData.start_cuti"
+                          v-model="editFormData.Start_Cuti"
                           variant="underlined"
                           density="compact"
                           append-inner-icon="mdi-calendar"
@@ -414,7 +414,7 @@
                           :rules="rules.applyRules"
                         ></v-text-field>
                         <VDatePicker
-                          v-model.string="editFormData.start_cuti"
+                          v-model.string="editFormData.Start_Cuti"
                           mode="date"
                           @dayclick="closeStartCutiDatePicker"
                           :masks="dateFormat"
@@ -429,7 +429,7 @@
                         <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
                         <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
                         <v-text-field
-                          v-model="editFormData.end_cuti"
+                          v-model="editFormData.End_Cuti"
                           variant="underlined"
                           density="compact"
                           append-inner-icon="mdi-calendar"
@@ -440,7 +440,7 @@
                           :rules="rules.applyRules"
                         ></v-text-field>
                         <VDatePicker
-                          v-model.string="editFormData.end_cuti"
+                          v-model.string="editFormData.End_Cuti"
                           mode="date"
                           @dayclick="closeEndCutiDatePicker"
                           :masks="dateFormat"
@@ -463,7 +463,7 @@
                         <v-text-field
                           variant="underlined"
                           placeholder="Kendari"
-                          v-model="editFormData.depart"
+                          v-model="editFormData.Depart"
                           :rules="rules.applyRules"
                         >
                         </v-text-field>
@@ -474,7 +474,7 @@
                         <v-text-field
                           variant="underlined"
                           placeholder="Jakarta"
-                          v-model="editFormData.arrival"
+                          v-model="editFormData.Arrival"
                           :rules="rules.applyRules"
                         >
                         </v-text-field>
@@ -487,13 +487,13 @@
                       </v-col>
                     </v-row>
                   </v-col>
-                  <v-col v-else-if="editFormData.application_type == 'Resign'">
+                  <v-col v-else-if="editFormData.Application_Type == 'Resign'">
                     <v-row dense>
                       <v-col cols="5" v-click-outside="closeResignDatePicker">
                         <v-list-item-title>Tanggal Resign</v-list-item-title>
                         <v-list-item-subtitle> <i> Resign Date </i> </v-list-item-subtitle>
                         <v-text-field
-                          v-model="editFormData.resign_date"
+                          v-model="editFormData.Resign_Date"
                           variant="underlined"
                           density="compact"
                           append-inner-icon="mdi-calendar"
@@ -504,7 +504,7 @@
                           :rules="rules.applyRules"
                         ></v-text-field>
                         <VDatePicker
-                          v-model.string="editFormData.resign_date"
+                          v-model.string="editFormData.Resign_Date"
                           mode="date"
                           @dayclick="closeResignDatePicker"
                           :masks="dateFormat"
@@ -528,6 +528,7 @@
           </v-card>
         </v-dialog>
 
+        <!-- Edit Return Date Dialog -->
         <v-dialog v-model="togglerHandler.isReturnDateOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
@@ -560,20 +561,20 @@
                       mode="date"
                       @dayclick="closeEndCutiDatePicker"
                       :masks="dateFormat"
-                      :min-date="getDateObj(selectedKaryawan.start_contract)"
+                      :min-date="getDateObj(selectedKaryawan.Status.Start)"
                       v-if="togglerHandler.isEndCutiDatePickerOpen"
                     >
                     </VDatePicker>
                   </v-col>
                 </v-row>
-                <v-row dense v-if="selectedKaryawan.application.depart">
+                <v-row dense v-if="selectedKaryawan.Application.Depart">
                   <v-col>
                     <v-list-item-title> Keberangkatan </v-list-item-title>
                     <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
                     <v-text-field
                       variant="underlined"
                       placeholder="Jakarta"
-                      v-model="selectedKaryawan.application.arrival"
+                      v-model="selectedKaryawan.Application.Arrival"
                       readonly
                     >
                     </v-text-field>
@@ -584,7 +585,7 @@
                     <v-text-field
                       variant="underlined"
                       placeholder="Kendari"
-                      v-model="selectedKaryawan.application.depart"
+                      v-model="selectedKaryawan.Application.Depart"
                       readonly
                     >
                     </v-text-field>
@@ -604,6 +605,7 @@
           </v-card>
         </v-dialog>
 
+        <!-- Filter Join Date Dialog -->
         <v-dialog v-model="togglerHandler.isJoinDateFilterOpen" width="auto">
           <v-date-picker v-model.range="joinDateRange">
             <template #footer>
@@ -621,6 +623,7 @@
 <script setup>
 import { ref } from 'vue'
 import moment from 'moment'
+import axios from 'axios'
 
 import { cloneDeep, clone } from 'lodash'
 
@@ -658,192 +661,250 @@ export default {
       end: ref(null)
     }),
 
+    employees: ref([]),
+
     headers: [
       {
         title: 'NIK',
         align: 'start',
         sortable: false,
-        key: 'nik'
+        key: 'NIK'
       },
       {
         title: 'Name',
         align: 'start',
-        key: 'name'
+        key: 'Name'
       },
       {
         title: 'Jabatan',
         align: 'center',
-        key: 'position'
+        key: 'Position.Name'
       },
       {
         title: 'Penempatan',
         align: 'center',
-        key: 'site'
+        key: 'Company.Site.Name'
       },
       {
         title: 'Tanggal Join',
         align: 'center',
-        key: 'join_date'
+        key: 'Join_Date'
       },
       {
         title: 'Status',
         align: 'center',
-        key: 'status'
+        key: 'Status.Status'
       },
       {
         title: 'Pengajuan',
         align: 'center',
-        key: 'application_status'
+        key: 'Application.Application_Status'
       }
     ],
 
-    employees: [
-      {
-        nik: '1200012232500021',
-        name: 'Andy',
-        dob: '13/10/1998',
-        pob: 'Jakarta',
-        address: 'Jl. ',
-        position: 'Operator Mixer',
-        site: 'PT',
-        join_date: '19/10/2020',
-        status: 'Active',
-        start_contract: '20/07/2023',
-        end_contract: '20/01/2024',
-        application_status: null,
-        application: {
-          application_type: null,
-          start_contract: null,
-          end_contract: null,
-          start_cuti: null,
-          end_cuti: null,
-          depart: null,
-          arrival: null,
-          resign_date: null
-        }
-      },
-      {
-        nik: '1200012232500021',
-        name: 'Bob',
-        dob: '11/04/1994',
-        pob: 'Makassar',
-        address: 'Jl. ',
-        position: 'Operator Crane',
-        tonnage: '80',
-        site: 'PT',
-        join_date: '19/10/2020',
-        status: 'Close Project',
-        start_contract: '13/03/2023',
-        end_contract: '13/09/2023',
-        application_status: -1,
-        application: {
-          application_type: 'Kompensasi',
-          start_contract: '14/09/2023',
-          end_contract: '14/03/2023',
-          start_cuti: null,
-          end_cuti: null,
-          depart: null,
-          arrival: null,
-          resign_date: null
-        }
-      },
-      {
-        nik: '1200012232500021',
-        name: 'Alice',
-        dob: '12/9/1994',
-        pob: 'Tangerang',
-        address: 'Jl. ',
-        position: 'Jubir',
-        site: 'PT',
-        join_date: '19/10/2020',
-        status: 'Warning',
-        start_contract: '27/04/2023',
-        end_contract: '27/10/2023',
-        application_status: -1,
-        application: {
-          application_type: 'Cuti',
-          start_contract: null,
-          end_contract: null,
-          start_cuti: '28/10/2023',
-          end_cuti: null,
-          depart: null,
-          arrival: null,
-          resign_date: null
-        }
-      },
-      {
-        nik: '1200012232500021',
-        name: 'Bobby',
-        dob: '20/6/1994',
-        pob: 'Denpasar',
-        address: 'Jl. ',
-        position: 'Mekanik Junior',
-        site: 'PT',
-        join_date: '19/10/2020',
-        status: 'Cuti',
-        start_contract: '27/04/2023',
-        end_contract: null,
-        application_status: null,
-        application: {
-          application_type: null,
-          start_contract: null,
-          end_contract: null,
-          start_cuti: '27/04/2023',
-          end_cuti: null,
-          depart: null,
-          arrival: null,
-          resign_date: null
-        }
-      },
-      {
-        nik: '1200012232500021',
-        name: 'Connie',
-        dob: '10/5/1999',
-        pob: 'Kendari',
-        address: 'Jl. ',
-        position: 'Admin',
-        site: 'PT',
-        join_date: '20/10/2023',
-        status: 'Cuti',
-        start_contract: '27/04/2023',
-        end_contract: '10/05/2023',
-        application_status: null,
-        application: {
-          application_type: null,
-          start_contract: null,
-          end_contract: null,
-          start_cuti: '20/10/2023',
-          end_cuti: '5/11/2023',
-          depart: 'Kendari',
-          arrival: 'Jakarta',
-          resign_date: null
-        }
-      },
-      {
-        nik: '1200012232500021',
-        name: 'Conrad',
-        dob: '14/04/1989',
-        pob: 'Manado',
-        address: 'Jl. ',
-        position: 'Tyreman',
-        site: 'PT',
-        join_date: '20/10/2019',
-        status: 'Resign',
-        start_contract: '30/04/2023',
-        end_contract: null,
-        application_status: null,
-        application: {
-          application_type: null,
-          start_contract: null,
-          end_contract: null,
-          start_cuti: null,
-          end_cuti: null,
-          depart: null,
-          arrival: null,
-          resign_date: null
-        }
-      }
-    ],
+    // employees: [
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Andy',
+    //     DOB: '1998-10-13',
+    //     POB: 'Jakarta',
+    //     Address: 'Jl. ',
+    //     Join_Date: '2020-10-19',
+    //     Position: {
+    //       Name : 'Operator Crane',
+    //       Tonnage : '55'
+    //     },
+    //     Company : {
+    //       Name : 'PT.',
+    //       Site : {
+    //         Name : 'Morowali'
+    //       }
+    //     },
+    //     Status : {
+    //       Status: 'Active',
+    //       Start: '2023-07-20',
+    //       End: '2023-01-20',
+
+    //     },
+    //     Application: {
+    //       Application_Type: null,
+    //       Application_Status: null,
+    //       Start_Contract: null,
+    //       End_Contract: null,
+    //       Start_Cuti: null,
+    //       End_Cuti: null,
+    //       Depart: null,
+    //       Arrival: null,
+    //       Resign_Date: null
+    //     }
+    //   },
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Bob',
+    //     DOB: '1994-01-04',
+    //     POB: 'Makassar',
+    //     Address: 'Jl. ',
+    //     Position: {
+    //       Name : 'Operator Crane',
+    //       Tonnage : '80'
+    //     },
+    //     Company : {
+    //       Name : 'PT',
+    //       Site : {
+    //         Name : 'Morowali'
+    //       }
+    //     },
+    //     Join_Date: '2020-09-13',
+    //     Status : {
+    //       Status: 'Close Project',
+    //       Start: '2023-03-13',
+    //       End: '2023-09-13',
+    //     },
+    //     Application: {
+    //       Application_Status: -1,
+    //       Application_Type: 'Kompensasi',
+    //       Start_Contract: '2023-04-09',
+    //       End_Contract: '2023-10-09',
+    //       Start_Cuti: null,
+    //       End_Cuti: null,
+    //       Depart: null,
+    //       Arrival: null,
+    //       Resign_Date: null
+    //     }
+    //   },
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Alice',
+    //     DOB: '1994-04-19',
+    //     POB: 'Tangerang',
+    //     Address: 'Jl. ',
+    //     Position : {
+    //       Name : "Jubir"
+    //     },
+    //     Company : {
+    //       Name : 'PT',
+    //       Site : {
+    //         Name : 'Morowali'
+    //       }
+    //     },
+    //     Join_Date: '2020-10-09',
+    //     Status : {
+    //       Status: 'Warning',
+    //       Start: '2023-04-27',
+    //       End: '2023-10-27',
+    //     },
+    //     Application: {
+    //       Application_Status: -1,
+    //       Application_Type: 'Cuti',
+    //       Start_Contract: null,
+    //       End_Contract: null,
+    //       Start_Cuti: '2023-10-28',
+    //       End_Cuti: null,
+    //       Depart: null,
+    //       Arrival: null,
+    //       Resign_Date: null
+    //     }
+    //   },
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Bobby',
+    //     DOB: '1994-06-20',
+    //     POB: 'Denpasar',
+    //     Address: 'Jl. ',
+    //     Position: {
+    //       Name : 'Mekanik Junior' 
+    //     },
+    //     Company : {
+    //       Name : 'PT',
+    //       Site : {
+    //         Name : 'Morowali'
+    //       }
+    //     },
+    //     Join_Date: '2020-10-19',
+    //     Status: {
+    //       Status : 'Cuti',
+    //       Start: '2023-04-19',
+    //       End: null,
+    //     },
+    //     Application: {
+    //       Application_Status: null,
+    //       Application_Type: null,
+    //       Start_Contract: null,
+    //       End_Contract: null,
+    //       Start_Cuti: '2023-04-27',
+    //       End_Cuti: null,
+    //       Depart: null,
+    //       Arrival: null,
+    //       Resign_Date: null
+    //     }
+    //   },
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Connie',
+    //     DOB: '1999-05-10',
+    //     POB: 'Kendari',
+    //     Address: 'Jl. ',
+    //     Position: {
+    //       Name : 'Admin',
+    //     },
+    //     Company : {
+    //       Name : 'PT',
+    //       Site : {
+    //         Name : 'Morowali'
+    //       }
+    //     },
+    //     Join_Date: '2023-10-20',
+    //     Status: {
+    //       Status : 'Cuti',
+    //       Start: '2023-10-10',
+    //       End: '2023-10-24',
+    //     },
+    //     Application: {
+    //       Application_Status: null,
+    //       Application_Type: null,
+    //       Start_Contract: null,
+    //       End_Contract: null,
+    //       Start_Cuti: '2023-10-24',
+    //       End_Cuti: '2023-10-24',
+    //       Depart: 'Kendari',
+    //       Arrival: 'Jakarta',
+    //       Resign_Date: null
+    //     }
+    //   },
+    //   {
+    //     NIK: '1200012232500021',
+    //     Name: 'Conrad',
+    //     DOB: '1989-10-05',
+    //     POB: 'Manado',
+    //     Address: 'Jl. ',
+    //     Position: {
+    //       Name : 'Tyremen'
+    //     },
+    //     Company: {
+    //       Name : 'PT',
+    //       Site : {
+    //         Name : 'Morowali',
+    //       }
+    //     },
+    //     Join_Date: '2019-04-24',
+    //     Status: {
+    //       Status : 'Resign',
+    //       Start: '2023-04-30',
+    //       End: null,
+    //     },
+    //     Application: {
+    //       Application_Status: null,
+    //       Application_Type: null,
+    //       Start_Contract: null,
+    //       End_Contract: null,
+    //       Start_Cuti: null,
+    //       End_Cuti: null,
+    //       Depart: null,
+    //       Arrival: null,
+    //       Resign_Date: null
+    //     }
+    //   }
+    // ],
 
     messages: [
       {
@@ -870,8 +931,20 @@ export default {
     }
   }),
   methods: {
+    getAllEmployees(){
+      axios.get(`${this.karyawanURL}/karyawan/`)
+      .then((response)=>{
+        if(response.status == 200){
+          // console.log(response.data)
+          this.employees = response.data
+        }
+      }).catch((error)=>{
+        console.log("Error Fetching Data : ", error)
+      })
+    },
+
     getColor(status) {
-      if (status == 'Warning') return 'orange'
+      if (status == "Warning") return 'orange'
       else if (status == 'Close Project') return 'red'
       else if (status == 'Cuti') return 'yellow'
       else if (status == 'Resign') return 'black'
@@ -912,8 +985,8 @@ export default {
     openEditPengajuanDialog() {
       this.editFormData = this.getCurrentApplication
 
-      this.editFormData.start_contract = this.setStartContractDate
-      this.editFormData.end_contract = this.setEndContractDate
+      this.editFormData.Start_Contract = this.setStartContractDate
+      this.editFormData.End_Contract = this.setEndContractDate
 
       this.togglerHandler.isEditPengajuanOpen = true
     },
@@ -935,8 +1008,8 @@ export default {
     // Date Picker Handler
     openEndCutiDatePicker() {
       try {
-        if (this.editFormData.start_cuti) {
-          this.getDateObj(this.editFormData.start_cuti)
+        if (this.editFormData.Start_Cuti) {
+          this.getDateObj(this.editFormData.Start_Cuti)
           this.togglerHandler.isEndCutiDatePickerOpen = true
         } else {
           throw new Error('Tanggal Cuti is Required')
@@ -989,7 +1062,9 @@ export default {
       }
     }
   },
- 
+  mounted () {
+    this.getAllEmployees();
+  },
   computed: {
     // Filter the Employees
     filteredEmployees(){
@@ -997,7 +1072,7 @@ export default {
       const end = this.joinDateRange.end
       if(start && end){
         return this.employees.filter((employee) =>{
-          const joinDate = this.getDateObj(employee.join_date)
+          const joinDate = this.getDateObj(employee.Join_Date)
           return joinDate >= start && joinDate <= end;
         })
       }
@@ -1008,8 +1083,8 @@ export default {
     getCurrentApplication() {
       if (this.selectedKaryawan) {
         const karyawan = this.selectedKaryawan
-        if (karyawan && karyawan.application_status) {
-          return cloneDeep(karyawan.application)
+        if (karyawan && karyawan.Application.Application_Status) {
+          return cloneDeep(karyawan.Application)
         }
       }
       return null
@@ -1017,8 +1092,8 @@ export default {
 
     // Set Up return date (Cuti)
     getReturnDate() {
-      if (this.selectedKaryawan.end_contract && this.selectedKaryawan.status == 'Cuti') {
-        return clone(this.selectedKaryawan.end_contract)
+      if (this.selectedKaryawan.Status.End && this.selectedKaryawan.Status.Status == 'Cuti') {
+        return clone(this.selectedKaryawan.Status.End)
       }
       return null
     },

@@ -40,7 +40,7 @@
               readonly
               density="compact"
             >
-              {{ this.selectedKaryawan.name }}
+              {{ this.selectedKaryawan.Name }}
             </v-text-field>
           </v-col>
           <v-col cols=3>

@@ -22,7 +22,7 @@ export const karyawanMixin = {
 
         // Set the date string to date
         getDateObj(dateString){
-            const [date, month, year] = dateString.split('/');
+            const [year, month, date] = dateString.split('-');
             if (date && month && year) {
               return new Date(year, month - 1, date);
             } else {
@@ -32,13 +32,13 @@ export const karyawanMixin = {
     },
     computed : {
         getApplicationStatus(){
-            const status = this.applicationStatus[this.selectedKaryawan.application_status]
+            const status = this.applicationStatus[this.selectedKaryawan.Application.Application_Status]
             return status;
         },
         // Get the Init Start Contract Date (Kompensasi)
         setStartContractDate(){
             if(this.selectedKaryawan){
-                const endDate = this.getDateObj(this.selectedKaryawan.end_contract);
+                const endDate = this.getDateObj(this.selectedKaryawan.Status.End);
                 endDate.setDate(endDate.getDate() + 1);
                 return moment(endDate).format('DD/MM/YYYY');
             }
