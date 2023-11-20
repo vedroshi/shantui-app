@@ -67,13 +67,14 @@
           <template v-slot:[`item.Application.Application_Status`]="{ value, item }">
             {{
               value
-                ? `Ajukan ${item.Application.Application_Type} (${this.applicationStatus[value]})`
+                ? `Ajukan ${item.Application.Application_Type} (${item.Application.Application_Status})`
                 : item.Status.Status == 'Cuti' || item.Status.Status == 'Resign' || item.Status.Status == 'Cut Off'
                 ? item.Status.Status
                 : 'Belum Ajukan Form'
             }}
           </template>
         </v-data-table>
+
         <!-- Karyawan Details Dialog  -->
         <v-dialog
           v-model="togglerHandler.karyawanExpand"
@@ -116,7 +117,7 @@
                       <v-list-item-subtitle>Tonase</v-list-item-subtitle>
                       <v-list-item-title>{{
                         selectedKaryawan.Position.Tonnage
-                      }}</v-list-item-title>
+                      }} Ton </v-list-item-title>
                     </v-list-item>
                   </div>
                 </v-row>
@@ -141,7 +142,7 @@
               <v-list-item>
                 <v-list-item-subtitle>Tempat, Tanggal Lahir</v-list-item-subtitle>
                 <v-list-item-title
-                  >{{ selectedKaryawan.POB }}, {{ selectedKaryawan.DOB }}</v-list-item-title
+                  >{{ selectedKaryawan.POB }}, {{ formatDate(selectedKaryawan.DOB) }}</v-list-item-title
                 >
               </v-list-item>
 
@@ -157,7 +158,7 @@
 
               <v-list-item>
                 <v-list-item-subtitle>Tanggal Join</v-list-item-subtitle>
-                <v-list-item-title>{{ selectedKaryawan.Join_Date }}</v-list-item-title>
+                <v-list-item-title>{{ formatDate(selectedKaryawan.Join_Date) }}</v-list-item-title>
               </v-list-item>
 
               <v-row align="center" style="margin: 0.05rem">
@@ -168,7 +169,7 @@
                       selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak'
                     }}</v-list-item-subtitle
                   >
-                  <v-list-item-title>{{ selectedKaryawan.Status.Start }}</v-list-item-title>
+                  <v-list-item-title>{{ formatDate(selectedKaryawan.Status.Start) }}</v-list-item-title>
                 </v-list-item>
                 <div
                   v-if="selectedKaryawan.Status.End"
@@ -179,12 +180,13 @@
                     <v-list-item-subtitle
                       >Akhir {{ selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
                     </v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.Status.End }}</v-list-item-title>
+                    <v-list-item-title>{{ formatDate(selectedKaryawan.Status.End) }}</v-list-item-title>
                   </v-list-item>
                 </div>
               </v-row>
 
               <v-row align="center" style="margin: 0.05rem">
+                <!-- Employee Status -->
                 <v-list-item>
                   <v-list-item-subtitle>Status</v-list-item-subtitle>
                   <v-chip
@@ -196,17 +198,58 @@
                   </v-chip>
                 </v-list-item>
 
+                <!-- Application Status -->
                 <div v-if="selectedKaryawan.Status.Status != 'Cuti'">
                   <v-list-item>
                     <v-list-item-subtitle>Status Pengajuan</v-list-item-subtitle>
                     {{
                       selectedKaryawan.Application.Application_Type &&
-                      selectedKaryawan.Application_Status
-                        ? `Ajukan ${selectedKaryawan.Application.Application_Type} (${this.getApplicationStatus})`
+                      selectedKaryawan.Application.Application_Status
+                        ? `Ajukan ${selectedKaryawan.Application.Application_Type} (${selectedKaryawan.Application.Application_Status})`
                         : '-'
                     }}
                   </v-list-item>
                 </div>
+
+                <!-- Show the Application Date -->
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Kompensasi'" style="display:flex">
+                    <v-list-item>
+                      <v-list-item-subtitle>Tanggal Lanjut Kontrak</v-list-item-subtitle>
+                      {{ formatDate(selectedKaryawan.Application.Start_Contract) }}
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-subtitle>Tanggal Akhir Kontrak</v-list-item-subtitle>
+                      {{ formatDate(selectedKaryawan.Application.End_Contract) }}
+                    </v-list-item>
+                </div>
+
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Cuti'" style="display:flex">
+                    <v-list-item>
+                      <v-list-item-subtitle>Tanggal Mulai Cuti</v-list-item-subtitle>
+                      {{ formatDate(selectedKaryawan.Application.Start_Cuti) }}
+                    </v-list-item>
+                    <v-list-item v-if="selectedKaryawan.Application.End_Cuti">
+                      <v-list-item-subtitle>Tanggal Akhir Cuti</v-list-item-subtitle>
+                      {{ formatDate(selectedKaryawan.Application.End_Cuti) }}
+                    </v-list-item>
+                    <v-list-item v-if="selectedKaryawan.Application.Depart">
+                      <v-list-item-subtitle>Keberangkatan</v-list-item-subtitle>
+                      {{ selectedKaryawan.Application.Depart }}
+                    </v-list-item>
+                    <v-list-item v-if="selectedKaryawan.Application.Arrival">
+                      <v-list-item-subtitle>Kedatangan</v-list-item-subtitle>
+                      {{ selectedKaryawan.Application.Arrival }}
+                    </v-list-item>
+                </div>
+
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Resign'" style="display:flex">
+                    <v-list-item>
+                      <v-list-item-subtitle>Tanggal Resign</v-list-item-subtitle>
+                      {{ selectedKaryawan.Application.Resign_Date }}
+                    </v-list-item>
+                </div>
+
+                <!-- Depart and Arrival when employee is 'Cuti' -->
                 <div
                   style="display: flex"
                   v-else-if="
@@ -224,11 +267,12 @@
                     {{ selectedKaryawan.Application.Arrival }}
                   </v-list-item>
                 </div>
+
               </v-row>
             </div>
 
             <div class="karyawan-actions">
-              <v-row style="margin: 1rem" v-if="getApplicationStatus == 'Pending'">
+              <v-row style="margin: 1rem" v-if="selectedKaryawan.Application.Application_Status == 'Pending'">
                 <v-col cols="auto">
                   <v-btn> Pengajuan Disetujui </v-btn>
                 </v-col>
@@ -270,7 +314,7 @@
           </v-sheet>
         </v-dialog>
 
-        <!-- Form Dialog -->
+        <!-- Log Karyawan Dialog -->
         <v-dialog v-model="togglerHandler.isLogKaryawanOpen" width="auto">
           <v-card width="400">
             <v-img height="200" :src="card_bg" cover class="text-white">
@@ -433,7 +477,7 @@
                           variant="underlined"
                           density="compact"
                           append-inner-icon="mdi-calendar"
-                          @click:appendInner="openEndCutiDatePicker"
+                          @click:appendInner="openEndCutiDatePicker(editFormData.Start_Cuti)"
                           placeholder="DD/MM/YYYY"
                           clearable
                           required
@@ -444,7 +488,7 @@
                           mode="date"
                           @dayclick="closeEndCutiDatePicker"
                           :masks="dateFormat"
-                          :min-date="getDateObj(editFormData.start_cuti)"
+                          :min-date="getDateObj(convertDate(editFormData.Start_Cuti))"
                           v-if="togglerHandler.isEndCutiDatePickerOpen"
                         >
                         </VDatePicker>
@@ -546,18 +590,18 @@
                     <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
                     <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
                     <v-text-field
-                      v-model="setReturnData.returnDate"
+                      v-model="setReturnData.End_Cuti"
                       variant="underlined"
                       density="compact"
                       append-inner-icon="mdi-calendar"
-                      @click:appendInner="openEndCutiDatePicker"
+                      @click:appendInner="openEndCutiDatePicker(revertDate(selectedKaryawan.Status.Start))"
                       placeholder="DD/MM/YYYY"
                       clearable
                       required
                       :rules="rules.applyRules"
                     ></v-text-field>
                     <VDatePicker
-                      v-model.string="setReturnData.returnDate"
+                      v-model.string="setReturnData.End_Cuti"
                       mode="date"
                       @dayclick="closeEndCutiDatePicker"
                       :masks="dateFormat"
@@ -598,7 +642,7 @@
               <v-btn color="blue-darken-1" variant="text" @click="closeReturnDateDialog">
                 Close
               </v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="closeReturnDateDialog">
+              <v-btn color="blue-darken-1" variant="text" @click="setReturnDate">
                 Save
               </v-btn>
             </v-card-actions>
@@ -617,6 +661,9 @@
         </v-dialog>
       </div>
     </div>
+
+    <SnackbarView v-model:snackbarAttribute="snackbarAttribute" @update:snackbarAttribute="updateSnackbarAttribute" />
+
   </div>
 </template>
 
@@ -630,6 +677,7 @@ import { cloneDeep, clone } from 'lodash'
 import card_bg from '../../assets/crane_card_bg.jpg'
 
 import { karyawanMixin } from '../../mixins/karyawanMixin'
+import SnackbarView from '../../components/SnackbarView.vue'
 </script>
 
 <script>
@@ -650,8 +698,16 @@ export default {
       isJoinDateFilterOpen: ref(false)
     },
 
+    snackbarAttribute : {
+      isSnackbarOpen : ref(false),
+      isSuccess : ref(null),
+      message : ref(null),
+    },
+
     selectedKaryawan: ref({}),
-    editFormData: ref({}),
+    editFormData: ref({
+      
+    }),
     setReturnData: ref({}),
 
     search: ref(''),
@@ -929,7 +985,13 @@ export default {
     rules: {
       applyRules: [(value) => !!value || '*Required']
     }
+
   }),
+  watch : {
+    'editFormData.Application_Type': function(newType, oldType) {
+      this.resetApplicationForm(this.editFormData, this.togglerHandler, newType, oldType);
+    },
+  },
   methods: {
     getAllEmployees(){
       axios.get(`${this.karyawanURL}/karyawan/`)
@@ -942,6 +1004,7 @@ export default {
         console.log("Error Fetching Data : ", error)
       })
     },
+
 
     getColor(status) {
       if (status == "Warning") return 'orange'
@@ -984,10 +1047,15 @@ export default {
     // Edit Pengajuan Handler
     openEditPengajuanDialog() {
       this.editFormData = this.getCurrentApplication
-
       this.editFormData.Start_Contract = this.setStartContractDate
       this.editFormData.End_Contract = this.setEndContractDate
+      this.editFormData.Start_Cuti = this.isDateNullAndRevert(this.editFormData.Start_Cuti)
+      this.editFormData.End_Cuti = this.isDateNullAndRevert(this.editFormData.End_Cuti)
+      this.editFormData.Resign_Date = this.isDateNullAndRevert(this.editFormData.Resign_Date)
 
+      if(this.editFormData.Depart && this.editFormData.Arrival){
+        this.togglerHandler.isDepart = true
+      }
       this.togglerHandler.isEditPengajuanOpen = true
     },
 
@@ -997,7 +1065,7 @@ export default {
 
     // Add Return Date Handler
     openReturnDateDialog() {
-      this.setReturnData.returnDate = this.getReturnDate
+      this.setReturnData.End_Cuti = this.isDateNullAndRevert(this.getReturnDate)
       this.togglerHandler.isReturnDateOpen = true
     },
 
@@ -1006,16 +1074,16 @@ export default {
     },
 
     // Date Picker Handler
-    openEndCutiDatePicker() {
+    openEndCutiDatePicker(start_cuti) {
       try {
-        if (this.editFormData.Start_Cuti) {
-          this.getDateObj(this.editFormData.Start_Cuti)
+        if (start_cuti) {
+          this.getDateObj(this.convertDate(start_cuti))
           this.togglerHandler.isEndCutiDatePickerOpen = true
         } else {
           throw new Error('Tanggal Cuti is Required')
         }
       } catch (err) {
-        alert(err.message)
+        alert(`${err.message} ${start_cuti}`)
       }
     },
 
@@ -1053,16 +1121,60 @@ export default {
       return uniqueDates
     },
 
+    openSnackbar(isSuccess, message) {
+      this.snackbarAttribute.isSnackbarOpen = true;
+      this.snackbarAttribute.isSuccess = isSuccess;
+      this.snackbarAttribute.message = message;
+    },
+
+    updateSnackbarAttribute(updatedAttribute) {
+      this.snackbarAttribute = updatedAttribute;
+    },
+
     // Submit Edit Form
     async editApplyForm() {
       const { valid } = await this.$refs.editForm.validate()
-      if (valid) {
-        console.log('Edited')
-        console.log(this.editFormData)
+      
+      if (valid){
+      
+        this.editFormData.Start_Contract = this.isDateNullAndConvert(this.editFormData.Start_Contract)
+        this.editFormData.End_Contract = this.isDateNullAndConvert(this.editFormData.End_Contract)
+        this.editFormData.Start_Cuti = this.isDateNullAndConvert(this.editFormData.Start_Cuti)
+        this.editFormData.End_Cuti = this.isDateNullAndConvert(this.editFormData.End_Cuti)
+        this.editFormData.Resign_Date = this.isDateNullAndConvert(this.editFormData.Resign_Date)
+
+        await axios.post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, this.editFormData)
+        .then((response)=>{
+          if (response.status == 200){
+            this.closeEditPengajuanDialog()
+            this.selectedKaryawan.Application = response.data.application
+            this.openSnackbar(true, "Application Form Edited")
+          }
+        }).catch((error)=>{
+          console.log(error)
+          this.openSnackbar(false, error.message)
+        })
       }
-    }
+    },
+
+    // Submit Add Return Date
+    async setReturnDate(){
+      const {valid} = await this.$refs.endCutiForm.validate()
+
+      if(valid){
+        this.setReturnData.End_Cuti = this.convertDate(this.setReturnData.End_Cuti)
+        await axios.post(`${this.karyawanURL}/status/setendcuti/${this.selectedKaryawan.ID}`, this.setReturnData)
+        .then((response)=>{
+            this.closeReturnDateDialog()
+            this.selectedKaryawan.Status.End = response.data.end
+            this.openSnackbar(true, response.data.message)
+        }).catch((error)=>{
+          this.openSnackbar(false, error.data.message)
+        })
+      }
+    },
   },
-  mounted () {
+  created () {
     this.getAllEmployees();
   },
   computed: {
@@ -1105,7 +1217,9 @@ export default {
         ).format('DD/MM/YYYY')}`
       }
       return null
-    }
+    },
+
+
   }
 }
 </script>

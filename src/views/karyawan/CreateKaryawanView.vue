@@ -213,12 +213,8 @@
       </v-card>
     </v-dialog>
 
-    <v-snackbar v-model="snackbarAttribute.isSnackbarOpen" :color="snackbarAttribute.isSuccess ? 'success' : 'red'" bottom :timeout="2000">
-      {{snackbarAttribute.message}}
-      <template v-slot:actions>
-        <v-btn variant="text" @click="isSnackbarOpen = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
+    <SnackbarView v-model:snackbarAttribute="snackbarAttribute"> </SnackbarView>
+
   </div>
 </template>
 
@@ -229,16 +225,21 @@ import axios from 'axios'
 import { cloneDeep } from 'lodash'
 
 import { karyawanMixin } from '../../mixins/karyawanMixin'
+import SnackbarView from '../../components/SnackbarView.vue'
 </script>
 
 <script>
 export default {
   mixins: [karyawanMixin],
+  components : {
+    SnackbarView
+  },
   data: () => ({
     isDobDatePickerOpen: ref(false),
     isJoinDatePickerOpen: ref(false),
 
     addKaryawanProgressOpen: ref(false),
+
     snackbarAttribute: {
       isSnackbarOpen : ref(false),
       isSuccess : ref(null),
@@ -270,6 +271,12 @@ export default {
       },
       {
         position: 'Mekanik'
+      },
+      {
+        position: 'Driver DT'
+      },
+      {
+        position : 'Driver LV'
       }
     ],
 
@@ -311,6 +318,7 @@ export default {
       KTP: ref(null)
     }
   }),
+
   methods: {
     openDobDatePicker() {
       this.isDobDatePickerOpen = true
