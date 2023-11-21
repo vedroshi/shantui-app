@@ -215,11 +215,7 @@
                 <div v-if="selectedKaryawan.Application.Application_Type == 'Kompensasi'" style="display:flex">
                     <v-list-item>
                       <v-list-item-subtitle>Tanggal Lanjut Kontrak</v-list-item-subtitle>
-                      {{ formatDate(selectedKaryawan.Application.Start_Contract) }}
-                    </v-list-item>
-                    <v-list-item>
-                      <v-list-item-subtitle>Tanggal Akhir Kontrak</v-list-item-subtitle>
-                      {{ formatDate(selectedKaryawan.Application.End_Contract) }}
+                      {{ formatDate(selectedKaryawan.Application.Start_Contract) }} - {{ formatDate(selectedKaryawan.Application.End_Contract) }}
                     </v-list-item>
                 </div>
 
@@ -245,7 +241,7 @@
                 <div v-if="selectedKaryawan.Application.Application_Type == 'Resign'" style="display:flex">
                     <v-list-item>
                       <v-list-item-subtitle>Tanggal Resign</v-list-item-subtitle>
-                      {{ selectedKaryawan.Application.Resign_Date }}
+                      {{ formatDate(selectedKaryawan.Application.Resign_Date) }}
                     </v-list-item>
                 </div>
 
@@ -274,10 +270,10 @@
             <div class="karyawan-actions">
               <v-row style="margin: 1rem" v-if="selectedKaryawan.Application.Application_Status == 'Pending'">
                 <v-col cols="auto">
-                  <v-btn> Pengajuan Disetujui </v-btn>
+                  <v-btn @click="approveForm"> Pengajuan Disetujui </v-btn>
                 </v-col>
                 <v-col cols="auto">
-                  <v-btn> Pengajuan Ditolak </v-btn>
+                  <v-btn @click="rejectForm"> Pengajuan Ditolak </v-btn>
                 </v-col>
                 <v-col cols="auto" @click="openEditPengajuanDialog">
                   <v-btn> Edit Form </v-btn>
@@ -373,7 +369,7 @@
         </v-dialog>
 
         <!-- Edit Application Dialog -->
-        <v-dialog v-model="togglerHandler.isEditPengajuanOpen" width="auto">
+        <v-dialog persistent v-model="togglerHandler.isEditPengajuanOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
               <v-toolbar-title class="text-h6"> Edit Pengajuan </v-toolbar-title>
@@ -455,7 +451,10 @@
                           placeholder="DD/MM/YYYY"
                           clearable
                           required
-                          :rules="rules.applyRules"
+                          :rules="[
+                            (value) => this.required(value),
+                            (value) => this.isDateValid(value)
+                          ]"
                         ></v-text-field>
                         <VDatePicker
                           v-model.string="editFormData.Start_Cuti"
@@ -481,7 +480,11 @@
                           placeholder="DD/MM/YYYY"
                           clearable
                           required
-                          :rules="rules.applyRules"
+                          :rules="[
+                            (value) => this.required(value),
+                            (value) => this.isDateValid(value),
+                            (value) => this.endDateValidation(value, editFormData.Start_Cuti),
+                          ]"
                         ></v-text-field>
                         <VDatePicker
                           v-model.string="editFormData.End_Cuti"
@@ -493,6 +496,7 @@
                         >
                         </VDatePicker>
                       </v-col>
+                      <!-- End Cuti Checkbox -->
                       <v-col align-self="start">
                         <v-checkbox
                           label="Balik Cuti"
@@ -500,6 +504,7 @@
                         ></v-checkbox>
                       </v-col>
                     </v-row>
+
                     <v-row dense>
                       <v-col v-if="togglerHandler.isDepart">
                         <v-list-item-title> Keberangkatan </v-list-item-title>
@@ -508,7 +513,9 @@
                           variant="underlined"
                           placeholder="Kendari"
                           v-model="editFormData.Depart"
-                          :rules="rules.applyRules"
+                          :rules="[
+                            (value) => this.required(value)
+                          ]"
                         >
                         </v-text-field>
                       </v-col>
@@ -519,7 +526,10 @@
                           variant="underlined"
                           placeholder="Jakarta"
                           v-model="editFormData.Arrival"
-                          :rules="rules.applyRules"
+                          :rules="[
+                            (value) => this.required(value),
+                            (value) => this.isSameValidation(value, editFormData.Depart)
+                          ]"
                         >
                         </v-text-field>
                       </v-col>
@@ -545,7 +555,10 @@
                           placeholder="DD/MM/YYYY"
                           clearable
                           required
-                          :rules="rules.applyRules"
+                          :rules="[
+                            (value) => this.required(value),
+                            (value) => this.isDateValid(value)
+                          ]"
                         ></v-text-field>
                         <VDatePicker
                           v-model.string="editFormData.Resign_Date"
@@ -573,7 +586,7 @@
         </v-dialog>
 
         <!-- Edit Return Date Dialog -->
-        <v-dialog v-model="togglerHandler.isReturnDateOpen" width="auto">
+        <v-dialog persistent v-model="togglerHandler.isReturnDateOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
               <v-toolbar-title class="text-h6"> Return Date </v-toolbar-title>
@@ -598,7 +611,11 @@
                       placeholder="DD/MM/YYYY"
                       clearable
                       required
-                      :rules="rules.applyRules"
+                      :rules="[
+                        (value) => this.required(value),
+                        (value) => this.isDateValid(value),
+                        (value) => this.endDateValidation(value, revertDate(selectedKaryawan.Status.Start))
+                      ]"
                     ></v-text-field>
                     <VDatePicker
                       v-model.string="setReturnData.End_Cuti"
@@ -672,17 +689,18 @@ import { ref } from 'vue'
 import moment from 'moment'
 import axios from 'axios'
 
-import { cloneDeep, clone } from 'lodash'
+import { clone } from 'lodash'
 
 import card_bg from '../../assets/crane_card_bg.jpg'
 
 import { karyawanMixin } from '../../mixins/karyawanMixin'
+import { validationMixin } from '../../mixins/validationMixin'
 import SnackbarView from '../../components/SnackbarView.vue'
 </script>
 
 <script>
 export default {
-  mixins: [karyawanMixin],
+  mixins: [karyawanMixin , validationMixin],
   data: () => ({
     
     togglerHandler: {
@@ -982,10 +1000,6 @@ export default {
       }
     ],
 
-    rules: {
-      applyRules: [(value) => !!value || '*Required']
-    }
-
   }),
   watch : {
     'editFormData.Application_Type': function(newType, oldType) {
@@ -1046,7 +1060,7 @@ export default {
 
     // Edit Pengajuan Handler
     openEditPengajuanDialog() {
-      this.editFormData = this.getCurrentApplication
+      this.editFormData = this.getCurrentApplication()
       this.editFormData.Start_Contract = this.setStartContractDate
       this.editFormData.End_Contract = this.setEndContractDate
       this.editFormData.Start_Cuti = this.isDateNullAndRevert(this.editFormData.Start_Cuti)
@@ -1056,10 +1070,12 @@ export default {
       if(this.editFormData.Depart && this.editFormData.Arrival){
         this.togglerHandler.isDepart = true
       }
+
       this.togglerHandler.isEditPengajuanOpen = true
     },
 
     closeEditPengajuanDialog() {
+      this.$refs.editForm.reset()
       this.togglerHandler.isEditPengajuanOpen = false
     },
 
@@ -1083,7 +1099,7 @@ export default {
           throw new Error('Tanggal Cuti is Required')
         }
       } catch (err) {
-        alert(`${err.message} ${start_cuti}`)
+        alert(`${err.message}`)
       }
     },
 
@@ -1173,7 +1189,34 @@ export default {
         })
       }
     },
+
+    async approveForm(){
+      await axios.patch(`${this.karyawanURL}/apply/approve/${this.selectedKaryawan.ID}`)
+      .then((response)=>{
+        if(response){
+          this.selectedKaryawan.Application.Application_Status = response.data.status
+          this.openSnackbar(true, response.data.message)
+        }
+      }).catch((error)=>{
+        console.log(error)
+        this.openSnackbar(false, error.data.message)
+      })
+    },
+
+    async rejectForm(){
+      await axios.patch(`${this.karyawanURL}/apply/reject/${this.selectedKaryawan.ID}`)
+      .then((response)=>{
+        if(response){
+          this.selectedKaryawan.Application.Application_Status = response.data.status
+          this.openSnackbar(false, response.data.message)
+        }
+      }).catch((error)=>{
+        console.log(error)
+        this.openSnackbar(false, error.data.message)
+      })
+    },
   },
+
   created () {
     this.getAllEmployees();
   },
@@ -1189,17 +1232,6 @@ export default {
         })
       }
       return this.employees
-    },
-
-    // Set Up Form Data in Edit Application
-    getCurrentApplication() {
-      if (this.selectedKaryawan) {
-        const karyawan = this.selectedKaryawan
-        if (karyawan && karyawan.Application.Application_Status) {
-          return cloneDeep(karyawan.Application)
-        }
-      }
-      return null
     },
 
     // Set Up return date (Cuti)

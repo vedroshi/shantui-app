@@ -18,7 +18,10 @@
               placeholder="DD/MM/YYYY"
               clearable
               required
-              :rules="applyRules"
+              :rules="[
+                (value) => this.required(value),
+                (value) => this.isDateValid(value)
+              ]"
             ></v-text-field>
             <VDatePicker
               v-model.string="applyData.Apply_Date"
@@ -89,7 +92,9 @@
               density="compact"
               style="margin-top: 10px"
               inline
-              :rules="applyRules"
+              :rules="[
+                (value) => this.required(value)
+              ]"
             >
               <v-radio label="Kompensasi" value="Kompensasi" class="radio-item"></v-radio>
               <v-radio label="Cuti" value="Cuti" class="radio-item"></v-radio>
@@ -142,7 +147,10 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="applyRules"
+                  :rules="[
+                    (value) => this.required(value),
+                    (value) => this.isDateValid(value)
+                  ]"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.Start_Cuti"
@@ -169,7 +177,11 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="endCutiRules"
+                  :rules="[
+                    (value) => this.required(value),
+                    (value) => this.isDateValid(value),
+                    (value) => this.endDateValidation(value, applyData.Start_Cuti)
+                  ]"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.End_Cuti"
@@ -181,7 +193,6 @@
                 >
                 </VDatePicker>
               </v-col>
-
               <v-col align-self="start" cols="3">
                 <v-checkbox label="Balik Cuti" v-model="togglerHandler.isEndCuti"></v-checkbox>
               </v-col>
@@ -193,7 +204,9 @@
                 <v-text-field
                   v-model="applyData.Depart"
                   variant="underlined"
-                  :rules="travelRules"
+                  :rules="[
+                    (value) => this.required(value)
+                  ]"
                 >
                 </v-text-field>
               </v-col>
@@ -203,7 +216,10 @@
                 <v-text-field
                   variant="underlined"
                   v-model="applyData.Arrival"
-                  :rules="travelRules"
+                  :rules="[
+                    (value) => this.required(value),
+                    (value) => this.isSameValidation(value, applyData.Depart)
+                  ]"
                 >
                 </v-text-field>
               </v-col>
@@ -226,7 +242,10 @@
                   placeholder="DD/MM/YYYY"
                   clearable
                   required
-                  :rules="applyRules"
+                  :rules="[
+                    (value) => this.required(value),
+                    (value) => this.isDateValid(value)
+                  ]"
                 ></v-text-field>
                 <VDatePicker
                   v-model.string="applyData.Resign_Date"
@@ -256,13 +275,14 @@ import moment from 'moment'
 import axios from 'axios'
 
 import { karyawanMixin } from '../../mixins/karyawanMixin'
+import { validationMixin } from '../../mixins/validationMixin'
 
 import SnackbarView from '../../components/SnackbarView.vue'
 </script>
 
 <script>
 export default {
-  mixins : [karyawanMixin],
+  mixins : [karyawanMixin, validationMixin],
   components : {
     SnackbarView
   },
@@ -300,13 +320,6 @@ export default {
       // Resign
       Resign_Date : ref(null),
     },
-
-    applyRules: [(value) => !!value || "*Required"],
-    travelRules : [(value) => !!value || "*Required" ],
-    endCutiRules : [
-      (value) => !!value || "*Required",
-    ],
-  
 
   }),
   watch: {

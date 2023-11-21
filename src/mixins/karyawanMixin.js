@@ -1,5 +1,6 @@
 import moment from 'moment';
 import {ref} from 'vue';
+import {clone} from 'lodash';
 
 export const karyawanMixin = {
     data(){
@@ -14,6 +15,13 @@ export const karyawanMixin = {
         }
     },
     methods : {
+        // Set Up Form Data in Edit Application
+        getCurrentApplication() {
+            if (this.selectedKaryawan && this.selectedKaryawan.Application && this.selectedKaryawan.Application.Application_Status) {
+            return clone(this.selectedKaryawan.Application)
+        }
+            return null
+        },
         // Set the date string to date
         getDateObj(dateString){
             const [year, month, date] = dateString.split('-');
@@ -103,6 +111,8 @@ export const karyawanMixin = {
             return null;
         },
 
+
+    
       
     }
 }

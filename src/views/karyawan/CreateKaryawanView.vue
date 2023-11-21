@@ -13,7 +13,11 @@
               v-model="formData.NIK"
               variant="underlined"
               density="compact"
-              :rules="nikRules"
+              :rules="[
+                (value) => this.required(value),
+                (value) => this.lengthEqualValidation(value, 16),
+                (value) => this.numberCheckValidation(value)
+              ]"
               required
             ></v-text-field>
           </v-col>
@@ -25,7 +29,9 @@
               variant="underlined"
               density="compact"
               type="text"
-              :rules="nameRules"
+              :rules="[
+                (value) => this.required(value)
+              ]"
               required
             ></v-text-field>
           </v-col>
@@ -38,7 +44,9 @@
               v-model="formData.POB"
               variant="underlined"
               density="compact"
-              :rules="pobRules"
+              :rules="[
+                (value) => this.required(value),
+              ]"
               required
             ></v-text-field>
           </v-col>
@@ -54,7 +62,10 @@
               placeholder="DD/MM/YYYY"
               clearable
               required
-              :rules="dobRules"
+              :rules="[
+                (value) => this.required(value),
+                (value) => this.isDateValid(value)
+              ]"
             ></v-text-field>
             <VDatePicker
               v-model.string="formData.DOB"
@@ -76,7 +87,9 @@
               variant="underlined"
               density="compact"
               type="text"
-              :rules="addressRules"
+              :rules="[
+                (value) => this.required(value)
+              ]"
               required
             ></v-text-field>
           </v-col>
@@ -87,10 +100,12 @@
             <v-list-item-subtitle> <i> Religion </i> </v-list-item-subtitle>
             <v-text-field
               v-model="formData.Religion"
-              :rules="religionRules"
               variant="underlined"
               density="compact"
               required
+              :rules="[
+                (value) => this.required(value)
+              ]"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -108,7 +123,10 @@
               item-title="position"
               single-line
               clearable
-              :rules="positionRules"
+              :rules="[
+                (value) => (!!value && !!value.position) || 'Position is Required',
+                
+              ]"
               required
             >
             </v-combobox>
@@ -123,7 +141,9 @@
               :items="selectedPosition.tonnage"
               single-line
               variant="underlined"
-              :rules="tonnageRules"
+              :rules="[
+                (value) => this.required(value)
+              ]"
               suffix="Ton"
             ></v-combobox>
           </v-col>
@@ -141,7 +161,10 @@
               placeholder="DD/MM/YYYY"
               clearable
               required
-              :rules="joinRules"
+              :rules="[
+                (value) => this.required(value),
+                (value) => this.isDateValid(value)
+              ]"
             ></v-text-field>
             <VDatePicker
               v-model.string="formData.Join_Date"
@@ -160,7 +183,9 @@
               v-model="formData.Company.Name"
               variant="underlined"
               density="compact"
-              :rules="companyRules"
+              :rules="[
+                (value) => this.required(value)
+              ]"
             ></v-text-field>
           </v-col>
           <v-col cols="3">
@@ -170,15 +195,16 @@
               v-model="formData.Company.Site"
               variant="underlined"
               density="compact"
-              :rules="siteRules"
+              :rules="[
+                (value) => this.required(value),
+              ]"
             ></v-text-field>
           </v-col>
         </v-row>
         <v-row dense>
           <v-col cols="3">
             <v-file-input
-              :rules="uploadKTPRules"
-              accept="image/png, image/jpeg, image/bmp"
+            accept="image/png, image/jpeg, image/bmp"
               placeholder="Upload KTP"
               label="Upload KTP"
               prepend-icon="mdi-card-account-details-outline"
@@ -186,6 +212,9 @@
               show-size
               v-model="formData.KTP"
               required
+              :rules="[
+                (value) => this.required(value)
+              ]"
             ></v-file-input>
           </v-col>
         </v-row>
@@ -225,12 +254,14 @@ import axios from 'axios'
 import { cloneDeep } from 'lodash'
 
 import { karyawanMixin } from '../../mixins/karyawanMixin'
+import { validationMixin } from '../../mixins/validationMixin'
+
 import SnackbarView from '../../components/SnackbarView.vue'
 </script>
 
 <script>
 export default {
-  mixins: [karyawanMixin],
+  mixins: [karyawanMixin, validationMixin],
   components : {
     SnackbarView
   },
@@ -280,25 +311,6 @@ export default {
       }
     ],
 
-    nikRules: [
-      (value) => !!value || 'NIK is Required',
-      (value) => (value && value.length == 16) || 'Length of NIK must be 16'
-    ],
-    nameRules: [(value) => !!value || 'Name is Required'],
-    uploadKTPRules: [
-      (value) => !!value || 'KTP is Required',
-      (value) => (value && value[0].size < 2000000) || 'KTP image size should be less than 2 MB!'
-    ],
-    pobRules: [(value) => !!value || 'Place of Birth is Required'],
-    dobRules: [(value) => !!value || 'Date of Birth is Required'],
-    addressRules: [(value) => !!value || 'Address is Required'],
-    religionRules: [(value) => !!value || 'Religion is Required'],
-    joinRules: [(value) => !!value || 'Join Date is Required'],
-    siteRules: [(value) => !!value || 'Site is Required'],
-    companyRules: [(value) => !!value || 'Company is Required'],
-    positionRules: [(value) => (!!value && !!value.position) || 'Position is Required'],
-    tonnageRules: [(value) => !!value || 'Tonnage is Required'],
-
     formData: {
       NIK: ref(null),
       Name: ref(null),
@@ -323,6 +335,7 @@ export default {
     openDobDatePicker() {
       this.isDobDatePickerOpen = true
     },
+
     closeDobDatePicker() {
       // this.dob = moment(this.dob).format('DD/MM/YYYY')
       this.isDobDatePickerOpen = false
@@ -331,6 +344,7 @@ export default {
     openJoinDatePicker() {
       this.isJoinDatePickerOpen = true
     },
+
     closeJoinDatePicker() {
       // this.join_date = moment(this.join_date).format('DD/MM/YYYY')
       this.isJoinDatePickerOpen = false
