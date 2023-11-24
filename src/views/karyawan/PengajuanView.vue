@@ -380,7 +380,14 @@ export default {
         this.applyData.Start_Contract = this.isDateNullAndConvert(this.applyData.Start_Contract)
         this.applyData.End_Contract = this.isDateNullAndConvert(this.applyData.End_Contract)
         this.applyData.Start_Cuti = this.isDateNullAndConvert(this.applyData.Start_Cuti)
-        this.applyData.End_Cuti = this.isDateNullAndConvert(this.applyData.End_Cuti)
+        
+        this.applyData.End_Cuti = this.togglerHandler.isEndCuti ? this.isDateNullAndConvert(this.applyData.End_Cuti) : null
+
+        if(!this.togglerHandler.isDepart){
+          this.applyData.Depart = null,
+          this.applyData.Arrival = null
+        }
+
         this.applyData.Resign_Date = this.isDateNullAndConvert(this.applyData.Resign_Date)
 
         await axios.post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, this.applyData)
@@ -388,7 +395,9 @@ export default {
           if (response.status == 200){
             this.openSnackbar(true, response.data.message)
             setTimeout(() => {
-              this.$router.back()
+              this.$router.push({
+                name : "KaryawanList"
+              })
             }, 1000);
           }
         }).catch((error)=>{

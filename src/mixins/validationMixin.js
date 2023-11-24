@@ -24,7 +24,7 @@ export const validationMixin = {
         },
 
         isDateValid(value){
-            return /^\d{2}\/\d{2}\/\d{4}$/.test(value) || "Date must be DD/MM/YYY"
+            return /^\d{2}\/\d{2}\/\d{4}$/.test(value) || "Date must be DD/MM/YYYY"
         }
 
     },
