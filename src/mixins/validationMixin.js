@@ -16,7 +16,7 @@ export const validationMixin = {
         },
 
         endDateValidation(value, start_date){
-            return this.getDateObj(this.convertDate(value)) > this.getDateObj(this.convertDate(start_date)) || "Invalid End Cuti"
+            return this.getDateObj(this.convertDate(value)) >= this.getDateObj(this.convertDate(start_date)) || "Invalid End Cuti"
         },
 
         numberCheckValidation(value){
@@ -25,6 +25,10 @@ export const validationMixin = {
 
         isDateValid(value){
             return /^\d{2}\/\d{2}\/\d{4}$/.test(value) || "Date must be DD/MM/YYYY"
+        },
+
+        isDifferentValue(value, oldValue){
+            return value !== oldValue || "Input Different Value"
         }
 
     },

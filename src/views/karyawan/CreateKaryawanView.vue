@@ -286,7 +286,6 @@ export default {
       },
       {
         position: 'Operator Excavator',
-        tonnage: [50, 55, 80]
       },
       {
         position: 'Driver Trailer'
@@ -308,6 +307,9 @@ export default {
       },
       {
         position : 'Driver LV'
+      }, 
+      {
+        position : "Logistik"
       }
     ],
 

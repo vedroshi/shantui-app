@@ -52,20 +52,6 @@
         </v-row>
         <v-row dense>
           <v-col cols="3">
-            <v-list-item-title> Departement </v-list-item-title>
-            <v-list-item-subtitle> <i> Department </i> </v-list-item-subtitle>
-            <v-text-field variant="underlined" readonly density="compact"> Plant </v-text-field>
-          </v-col>
-          <v-col cols="3">
-            <v-list-item-title> Penempatan </v-list-item-title>
-            <v-list-item-subtitle> <i> Site </i> </v-list-item-subtitle>
-            <v-text-field variant="underlined" readonly density="compact">
-              {{ this.selectedKaryawan.Company.Site.Name }}
-            </v-text-field>
-          </v-col>
-        </v-row>
-        <v-row dense>
-          <v-col cols="3">
             <v-list-item-title> Jabatan </v-list-item-title>
             <v-list-item-subtitle> <i> Position </i> </v-list-item-subtitle>
             <v-text-field variant="underlined" readonly density="compact">
@@ -78,6 +64,38 @@
             <v-list-item-subtitle> <i> Tonnage </i> </v-list-item-subtitle>
             <v-text-field variant="underlined" readonly density="compact" suffix="Ton">
               {{ selectedKaryawan.Position.Tonnage }}
+            </v-text-field>
+          </v-col>
+
+          <v-col cols="3">
+            <v-list-item-title> Departement </v-list-item-title>
+            <v-list-item-subtitle> <i> Department </i> </v-list-item-subtitle>
+            <v-text-field variant="underlined" readonly density="compact"> Plant </v-text-field>
+          </v-col>
+
+          <v-col cols="3">
+            <v-list-item-title> Penempatan </v-list-item-title>
+            <v-list-item-subtitle> <i> Site </i> </v-list-item-subtitle>
+            <v-text-field variant="underlined" readonly density="compact">
+              {{ this.selectedKaryawan.Company.Site.Name }}
+            </v-text-field>
+          </v-col>
+        </v-row>
+        <v-row dense>
+
+          <v-col cols="3">
+            <v-list-item-title> Mulai Kontrak </v-list-item-title>
+            <v-list-item-subtitle> <i> Start Contract </i> </v-list-item-subtitle>
+            <v-text-field variant="underlined" readonly density="compact">
+              {{ revertDate(selectedKaryawan.Status.Start) }}
+            </v-text-field>
+          </v-col>
+
+          <v-col cols="3" v-if="selectedKaryawan.Status.End ">
+            <v-list-item-title> Akhir Kontrak </v-list-item-title>
+            <v-list-item-subtitle> <i> End Contract </i> </v-list-item-subtitle>
+            <v-text-field variant="underlined" readonly density="compact">
+              {{ revertDate(selectedKaryawan.Status.End) }}
             </v-text-field>
           </v-col>
         </v-row>
@@ -149,7 +167,8 @@
                   required
                   :rules="[
                     (value) => this.required(value),
-                    (value) => this.isDateValid(value)
+                    (value) => this.isDateValid(value),
+                    (value) => this.endDateValidation(value, this.revertDate(this.selectedKaryawan.Status.Start))
                   ]"
                 ></v-text-field>
                 <VDatePicker
@@ -338,6 +357,7 @@ export default {
     openStartCutiDatePicker() {
       this.togglerHandler.isStartCutiDatePickerOpen = true
     },
+    
     closeStartCutiDatePicker() {
       this.togglerHandler.isStartCutiDatePickerOpen = false
     },
