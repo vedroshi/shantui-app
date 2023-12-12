@@ -282,10 +282,18 @@ export default {
     positionItems: [
       {
         position: 'Operator Crane',
-        tonnage: [50, 55, 80]
+        tonnage: [50, 55, 80, 105]
       },
       {
         position: 'Operator Excavator',
+        tonnage : [200, 300]
+      },
+      {
+        position : "Operator Loader",
+        tonnage : [3, 5]
+      },
+      {
+        position : "Operator Dozer",
       },
       {
         position: 'Driver Trailer'

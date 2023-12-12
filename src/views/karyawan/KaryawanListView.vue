@@ -59,6 +59,7 @@
           <template v-slot:[`item.Status.Start`]="{ value }">
             {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
+          
           <template v-slot:[`item.Status.End`]="{ value }">
             {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
@@ -129,7 +130,9 @@
                     <v-list-item>
                       <v-list-item-subtitle>Tonase</v-list-item-subtitle>
                       <v-list-item-title
-                        >{{ selectedKaryawan.Position.Tonnage }} Ton
+                        >{{ selectedKaryawan.Position.Name == "Operator Excavator" ? 'PC' : ''}} 
+                        {{ selectedKaryawan.Position.Tonnage }} 
+                        {{ selectedKaryawan.Position.Name == "Operator Excavator" ? '' : 'Ton'}}
                       </v-list-item-title>
                     </v-list-item>
                   </div>
