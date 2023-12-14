@@ -395,22 +395,32 @@ export default {
     async applyForm(){
       const { valid } = await this.$refs.form.validate();
       if (valid){
-        this.applyData.Apply_Date = this.convertDate(this.applyData.Apply_Date)
-        this.applyData.Application_Status = 'Pending'
-        this.applyData.Start_Contract = this.isDateNullAndConvert(this.applyData.Start_Contract)
-        this.applyData.End_Contract = this.isDateNullAndConvert(this.applyData.End_Contract)
-        this.applyData.Start_Cuti = this.isDateNullAndConvert(this.applyData.Start_Cuti)
-        
-        this.applyData.End_Cuti = this.togglerHandler.isEndCuti ? this.isDateNullAndConvert(this.applyData.End_Cuti) : null
-
-        if(!this.togglerHandler.isDepart){
-          this.applyData.Depart = null,
-          this.applyData.Arrival = null
+        // Convert the applyData (Vue) -> applyFormData (API Payload)
+        const applyFormData = {
+          Apply_Date : this.convertDate(this.applyData.Apply_Date),
+          Application_Status : 'Pending',
+          Application_Type : this.applyData.Application_Type
         }
 
-        this.applyData.Resign_Date = this.isDateNullAndConvert(this.applyData.Resign_Date)
+        if(applyFormData.Application_Type == "Kompensasi"){
+          applyFormData.Start = this.isDateNullAndConvert(this.applyData.Start_Contract)
+          applyFormData.End = this.isDateNullAndConvert(this.applyData.End_Contract)
+        }else if (applyFormData.Application_Type == "Cuti"){
+          applyFormData.Start = this.isDateNullAndConvert(this.applyData.Start_Cuti)
+          applyFormData.End = this.togglerHandler.isEndCuti ? this.isDateNullAndConvert(this.applyData.End_Cuti) : null
+          applyFormData.Depart = this.applyData.Depart,
+          applyFormData.Arrival = this.applyData.Arrival
+          // Check if the employee is depart during "Cuti"
+        }else if (applyFormData.Application_Type == "Resign"){
+          applyFormData.Resign_Date = this.isDateNullAndConvert(this.applyData.Resign_Date)
+        }
+        
+        if(!this.togglerHandler.isDepart || applyFormData.Application_Type != "Cuti"){
+          applyFormData.Depart = null,
+          applyFormData.Arrival = null
+        }
 
-        await axios.post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, this.applyData)
+        await axios.post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, applyFormData)
         .then((response)=>{
           if (response.status == 200){
             this.openSnackbar(true, response.data.message)

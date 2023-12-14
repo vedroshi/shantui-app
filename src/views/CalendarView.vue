@@ -63,6 +63,7 @@ export default {
         dateClick: this.handleDateClick,
         events : [
           {
+            // Mulai Kerja, Cuti, Akhir Cuti, Resign, Cut Off, Lanjut Kontrak, Tanggal Jatuh Tempo
             title: 'The Title',
             start: moment(new Date()).format('yyyy-MM-DD'),
             editable : false, 
@@ -92,6 +93,10 @@ export default {
     closeAgenda(){
       this.agendaIsOpen = false
     }
+  },
+
+  mounted(){
+  
   }
 }
 </script>

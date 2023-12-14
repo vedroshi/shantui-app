@@ -1,51 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
-
-const notifExpand = ref(false)
-
-const showNotif = () => {
-  notifExpand.value = !notifExpand.value
-}
-const hideNotif = () => {
-  notifExpand.value = false
-}
-
-const langOptions = [
-  {
-    lang: 'en',
-    value: 'EN',
-    name: 'English'
-  },
-  {
-    lang: 'cn',
-    value: '中文',
-    name: 'Chinese'
-  },
-  {
-    lang: 'id',
-    value: 'ID',
-    name: 'Indonesian'
-  }
-]
-const selectedLang = ref(langOptions[0])
-</script>
-
-<script>
-export default {
-  data: () => ({
-    notifItems: [
-      {
-        title: 'Title',
-        description: 'Description'
-      }
-    ]
-  }),
-  methods: {}
-}
-</script>
-
 <template>
   <nav>
     <div class="nav-path">
@@ -70,6 +22,7 @@ export default {
         </li>
       </ol>
     </div>
+
     <div class="nav-menu">
       <div class="nav-menu-item search">
         <input type="text" placeholder="Search" />
@@ -118,18 +71,24 @@ export default {
           </div>
         </Listbox>
       </div>
+
       <div
         class="nav-menu-item notification"
         v-bind:class="notifExpand && 'notif-expanded'"
         v-click-outside="hideNotif"
       >
         <v-btn class="notif-button" @click="showNotif">
-          <v-badge class="notif-count" content="1" color="error">
-            
+
+          <v-badge class="notif-count" :content="getNotifIsReadCount" color="error" v-if="getNotifIsReadCount > 0">  
             <span class="material-symbols-outlined"> 
               {{ notifExpand ? "notifications_active" : "notifications" }}  
             </span>
           </v-badge>
+         
+          <span class="material-symbols-outlined" v-else> 
+            {{ notifExpand ? "notifications_active" : "notifications" }}  
+          </span>
+         
         </v-btn>
         <v-card v-show="notifExpand" class="notif-details">
           <v-card-title> Notification </v-card-title>
@@ -137,13 +96,14 @@ export default {
           <v-virtual-scroll height="350" width="350" :items="notifItems">
             <template v-slot:default="{ item }">
               <v-list-item
-                :title="`${item.title}`"
-                :subtitle="`${item.description}`"
+                :title="`${item.Title}`"
+                :subtitle="`${item.Description}`"
                 class="notif-item"
+                @click="readNotif(item)"
               >
                 <template v-slot:append>
-                  <p>10/10/23</p>
-                  <span class="status"></span>
+                  <p>{{ moment(item.createdAt).format('DD/MM/YYYY') }}</p>
+                  <span v-show="!item.IsRead" class="status"></span>
                 </template>
               </v-list-item>
               <v-divider :thickness="5"> </v-divider>
@@ -335,3 +295,86 @@ nav {
   }
 }
 </style>
+
+<script setup>
+import { ref } from 'vue'
+import axios from 'axios'
+
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
+import { karyawanMixin } from '../mixins/karyawanMixin';
+import moment from 'moment';
+
+const langOptions = [
+  {
+    lang: 'en',
+    value: 'EN',
+    name: 'English'
+  },
+  {
+    lang: 'cn',
+    value: '中文',
+    name: 'Chinese'
+  },
+  {
+    lang: 'id',
+    value: 'ID',
+    name: 'Indonesian'
+  }
+]
+const selectedLang = ref(langOptions[0])
+</script>
+
+<script>
+export default {
+  mixins : [karyawanMixin],
+  data: () => ({
+    notifExpand : ref(false),
+    notifItems: [
+      // {
+      //   title: 'Title',
+      //   description: 'Description'
+      // }
+    ]
+  }),
+  methods: {
+    getNotification(){
+      axios.get(`${this.karyawanURL}/notif/`)
+      .then((response)=>{
+        this.notifItems = response.data
+      }).catch((error)=>{
+        console.log(error)
+      })
+    },
+
+    // Notification
+    showNotif(){
+      this.notifExpand = !this.notifExpand
+    },
+    hideNotif(){
+      this.notifExpand = false
+    },
+
+    readNotif(item){
+      axios.patch(`${this.karyawanURL}/notif/read/${item.ID}`)
+      .then((response)=>{
+        // Change the notif
+        if(response.data.Message == "Notification Read"){
+          item.IsRead = true
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
+    }
+  },
+  mounted() {
+    this.getNotification()
+  },
+  computed : {
+    getNotifIsReadCount(){
+      const notReadNotif = this.notifItems.filter(item => item.IsRead == 0)
+      const notReadNotifCount = notReadNotif.length
+      return notReadNotifCount < 9 ? notReadNotifCount : '9+'
+    }
+  }
+}
+</script>

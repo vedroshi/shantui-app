@@ -43,6 +43,8 @@
     </div>
     <div class="karyawan-contents">
       <div class="karyawan-table">
+
+        <!-- Karyawan Data table -->
         <v-data-table
           :headers="headers"
           :items="filteredEmployees"
@@ -172,11 +174,13 @@
                 <v-list-item-title>{{ selectedKaryawan.Company.Site.Name }}</v-list-item-title>
               </v-list-item>
 
+              <!-- Join Date -->
               <v-list-item>
                 <v-list-item-subtitle>Tanggal Join</v-list-item-subtitle>
                 <v-list-item-title>{{ formatDate(selectedKaryawan.Join_Date) }}</v-list-item-title>
               </v-list-item>
 
+              <!-- Contract Date -->
               <v-row align="center" style="margin: 0.05rem">
                 <v-list-item>
                   <v-list-item-subtitle
@@ -238,8 +242,8 @@
                 >
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Lanjut Kontrak</v-list-item-subtitle>
-                    {{ formatDate(selectedKaryawan.Application.Start_Contract) }} -
-                    {{ formatDate(selectedKaryawan.Application.End_Contract) }}
+                    {{ formatDate(selectedKaryawan.Application.Start) }} -
+                    {{ formatDate(selectedKaryawan.Application.End) }}
                   </v-list-item>
                 </div>
 
@@ -249,9 +253,9 @@
                 >
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Mulai Cuti</v-list-item-subtitle>
-                    {{ formatDate(selectedKaryawan.Application.Start_Cuti) }}
+                    {{ formatDate(selectedKaryawan.Application.Start) }}
                   </v-list-item>
-                  <v-list-item v-if="selectedKaryawan.Application.End_Cuti">
+                  <v-list-item v-if="selectedKaryawan.Application.End">
                     <v-list-item-subtitle>Tanggal Akhir Cuti</v-list-item-subtitle>
                     {{ formatDate(selectedKaryawan.Application.End_Cuti) }}
                   </v-list-item>
@@ -271,7 +275,7 @@
                 >
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Resign</v-list-item-subtitle>
-                    {{ formatDate(selectedKaryawan.Application.Resign_Date) }}
+                    {{ formatDate(selectedKaryawan.Application.Start) }}
                   </v-list-item>
                 </div>
 
@@ -732,6 +736,7 @@
         </v-dialog>
       </div>
     </div>
+    
     <SnackbarView
       v-model:snackbarAttribute="snackbarAttribute"
       @update:snackbarAttribute="updateSnackbarAttribute"
@@ -1225,26 +1230,33 @@ export default {
     // Submit Edit Form
     async editApplyForm() {
       const { valid } = await this.$refs.editForm.validate()
-
       if (valid) {
-        this.editFormData.Start_Contract = this.isDateNullAndConvert(
-          this.editFormData.Start_Contract
-        )
-        this.editFormData.End_Contract = this.isDateNullAndConvert(this.editFormData.End_Contract)
-        this.editFormData.Start_Cuti = this.isDateNullAndConvert(this.editFormData.Start_Cuti)
-        this.editFormData.End_Cuti = this.togglerHandler.isEndCuti
-          ? this.isDateNullAndConvert(this.editFormData.End_Cuti)
-          : null
-        this.editFormData.Resign_Date = this.isDateNullAndConvert(this.editFormData.Resign_Date)
+        // Set up API Payload
+        const editApplyData = {
+          Application_Status : "Pending",
+          Application_Type : this.editFormData.Application_Type
+        }
 
-        if (!this.togglerHandler.isDepart) {
-          this.editFormData.Depart = null
-          this.editFormData.Arrival = null
+        if(editApplyData.Application_Type == "Kompensasi"){
+          editApplyData.Start = this.isDateNullAndConvert(this.editFormData.Start_Contract)
+          editApplyData.End = this.isDateNullAndConvert(this.editFormData.End_Contract)
+        }else if (editApplyData.Application_Type == "Cuti"){
+          editApplyData.Start =  this.isDateNullAndConvert(this.editFormData.Start_Cuti)
+          editApplyData.End = this.togglerHandler.isEndCuti ? this.isDateNullAndConvert(this.editFormData.End_Cuti) : null
+          editApplyData.Depart = this.editFormData.Depart
+          editApplyData.Arrival = this.editFormData.Arrival
+        }else if (editApplyData.Application_Type == "Resign"){
+          editApplyData.Start = this.isDateNullAndConvert(this.editFormData.Resign_Date)
+        }
+
+        if (!this.togglerHandler.isDepart || editApplyData.Application_Type != "Cuti") {
+          editApplyData.Depart = null
+          editApplyData.Arrival = null
         }
 
 
         await axios
-          .post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, this.editFormData)
+          .post(`${this.karyawanURL}/apply/${this.selectedKaryawan.ID}`, editApplyData)
           .then((response) => {
             if (response.status == 200) {
               this.closeEditPengajuanDialog()

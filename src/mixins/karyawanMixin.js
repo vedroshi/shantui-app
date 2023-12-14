@@ -111,8 +111,5 @@ export const karyawanMixin = {
             return null;
         },
 
-
-    
-      
     }
 }
