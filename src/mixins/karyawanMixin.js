@@ -15,6 +15,16 @@ export const karyawanMixin = {
         }
     },
     methods : {
+        // Set v-chip color on "status" table
+        getColor(status) {
+            if (status == 'Warning') return 'orange'
+            else if (status == 'Close Project') return 'red'
+            else if (status == 'Cuti') return 'yellow'
+            else if (status == 'Resign') return 'black'
+            else if (status == 'Cut Off') return 'brown'
+            else return 'green'
+        },
+
         // Set Up Form Data in Edit Application
         getCurrentApplication() {
             if (this.selectedKaryawan && this.selectedKaryawan.Application && this.selectedKaryawan.Application.Application_Status) {

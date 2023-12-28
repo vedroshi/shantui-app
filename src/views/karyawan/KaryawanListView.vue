@@ -71,6 +71,7 @@
               {{ value }}
             </v-chip>
           </template>
+          
           <template v-slot:[`item.Application.Application_Status`]="{ value, item }">
             {{
               value && item.Application.Application_Type != "Return"
@@ -257,7 +258,7 @@
                   </v-list-item>
                   <v-list-item v-if="selectedKaryawan.Application.End">
                     <v-list-item-subtitle>Tanggal Akhir Cuti</v-list-item-subtitle>
-                    {{ formatDate(selectedKaryawan.Application.End_Cuti) }}
+                    {{ formatDate(selectedKaryawan.Application.End) }}
                   </v-list-item>
                   <v-list-item v-if="selectedKaryawan.Application.Depart">
                     <v-list-item-subtitle>Keberangkatan</v-list-item-subtitle>
@@ -1086,15 +1087,6 @@ export default {
         .catch((error) => {
           console.log('Error Fetching Data : ', error)
         })
-    },
-
-    getColor(status) {
-      if (status == 'Warning') return 'orange'
-      else if (status == 'Close Project') return 'red'
-      else if (status == 'Cuti') return 'yellow'
-      else if (status == 'Resign') return 'black'
-      else if (status == 'Cut Off') return 'brown'
-      else return 'green'
     },
 
     // Clear Join Date Range
