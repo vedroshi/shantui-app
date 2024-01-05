@@ -149,7 +149,7 @@
                   </v-btn>
                 </v-row>
                 <v-row justify="end" style="margin-bottom: 1rem">
-                  <v-btn>
+                  <v-btn @click="downloadContract">
                     <span class="material-symbols-outlined mr-1"> download </span>
                     Download PKWT
                   </v-btn>
@@ -751,6 +751,7 @@ import moment from 'moment'
 import axios from 'axios'
 
 import { clone } from 'lodash'
+import { saveAs } from 'file-saver'
 
 import card_bg from '../../assets/crane_card_bg.jpg'
 
@@ -1368,6 +1369,22 @@ export default {
       if(valid){
         console.log("Extend Set")
       }
+    },
+
+    async downloadContract(){
+      await axios.get(`${this.karyawanURL}/contract/generate/${this.selectedKaryawan.ID}`, {
+        responseType : 'blob'
+      })
+      .then((response)=>{
+       
+        // Create a Blob object from the response data
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        const fileName = `PKWT - ${this.selectedKaryawan.Name.toUpperCase()}.docx`
+        saveAs(blob, fileName)
+
+      }).catch((error)=>{
+        console.log(error)
+      })
     }
     
   },
