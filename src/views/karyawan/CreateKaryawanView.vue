@@ -282,42 +282,78 @@ export default {
     positionItems: [
       {
         position: 'Operator Crane',
-        tonnage: [50, 55, 80, 105]
+        tonnage: [25, 55, 75, 80, 100, 135]
       },
       {
         position: 'Operator Excavator',
-        tonnage : [200, 300]
+        tonnage : [75, 215, 365]
       },
       {
         position : "Operator Loader",
         tonnage : [3, 5]
       },
       {
-        position : "Operator Dozer",
+        position : "Driver DT"
       },
       {
-        position: 'Driver Trailer'
+        position : "Driver Trailer"
       },
       {
-        position: 'Driver Mixer'
+        position : "Operator Dozer"
       },
       {
-        position: 'Jubir'
+        position : "Driver LV"
       },
       {
-        position: 'Helper'
+        position : "Driver LT"
       },
       {
-        position: 'Mekanik'
+        position : "Foreman"
       },
       {
-        position: 'Driver DT'
+        position : "SPV Foreman"
       },
       {
-        position : 'Driver LV'
-      }, 
+        position : "Jubir"
+      },
       {
-        position : "Logistik"
+        position : "Helper"
+      },
+      {
+        position : "Helper Assembling"
+      },
+      {
+        position : "HR"
+      },
+      {
+        position : "HSE"
+      },
+      {
+        position : "Admin Plant"
+      },
+      {
+        position : "Bobok"
+      },
+      {
+        position : "Mekanik"
+      },
+      {
+        position : "Mekanik Repair"
+      },
+      {
+        position : "Mekanik Junior"
+      },
+      {
+        position : "Tyreman"
+      },
+      {
+        position : "Logistic"
+      },
+      {
+        position : "SPV Tyreman"
+      },
+      {
+        position : "Cleaning Service"
       }
     ],
 

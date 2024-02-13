@@ -1,61 +1,87 @@
+<template>
+    <v-overlay
+      v-model = "$store.state.sidebarExpand"
+      location-strategy="connected"
+      scroll-strategy="block"
+    >
+    <aside v-bind:class="sidebarExpand && 'is-expanded'">
+      <div class="menu-toggle-wrap">
+        <div class="menu-toggle">
+          <v-btn density="comfortable" icon="mdi-format-list-bulleted" variant="text" @click="toggleMenu"></v-btn>
+        </div>
+        <div class="logo">
+          <img alt="Vue logo" class="logo" src="@/assets/Shantui_Logo.png" width="125" height="125" />
+        </div>
+      </div>
+
+      <div class="main-menu-items">
+        <router-link class="menu-button" to="/">
+          <span class="material-symbols-outlined"> dashboard </span>
+          <span class="menu-label">Dashboard</span>
+        </router-link>
+        <router-link class="menu-button" to="/calendar">
+          <span class="material-symbols-outlined"> event </span>
+          <span class="menu-label">Calendar</span>
+        </router-link>
+      </div>
+
+      <div class="main-menu-items">
+        <div class="menu-dropdown" v-bind:class="karyawanExpand && 'dropdown-expanded'">
+          <div class="dropdown-button" @click="toggleKaryawanMenu">
+            <span class="material-symbols-outlined"> group </span>
+            <span class="menu-label">Employees</span>
+            <span class="expand-more material-symbols-outlined"> expand_more </span>
+          </div>
+          <Transition name="dropdown-fall">
+            <div class="dropdown-items" v-if="karyawanExpand">
+              <router-link class="menu-button" to="/karyawan">
+                <span class="material-symbols-outlined"> badge </span>
+                <button class="menu-label">Employee List</button>
+              </router-link>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </aside>
+    </v-overlay>
+</template>
+
 <script setup>
 import { ref } from 'vue'
-
-const isExpanded = ref(localStorage.getItem('isExpanded') === 'true')
-
-const toggleMenu = () => {
-  isExpanded.value = !isExpanded.value
-  localStorage.setItem('isExpanded', isExpanded.value)
-}
-
-const karyawanExpand = ref(false)
-
-const toggleKaryawanMenu = () => {
-  karyawanExpand.value = !karyawanExpand.value
-}
 </script>
 
-<template>
-  <aside v-bind:class="isExpanded && 'is-expanded'">
-    <div class="menu-toggle-wrap">
-      <button class="menu-toogle" @click="toggleMenu">
-        <span class="material-symbols-outlined"> list </span>
-      </button>
-      <div class="logo">
-        <img alt="Vue logo" class="logo" src="@/assets/Shantui_Logo.png" width="125" height="125" />
-      </div>
-    </div>
+<script>
 
-    <div class="main-menu-items">
-      <router-link class="menu-button" to="/">
-        <span class="material-symbols-outlined"> dashboard </span>
-        <span class="menu-label">Dashboard</span>
-      </router-link>
-      <router-link class="menu-button" to="/calendar">
-        <span class="material-symbols-outlined"> event </span>
-        <span class="menu-label">Calendar</span>
-      </router-link>
-    </div>
+export default {
+  data: () => ({
+    isExpanded: ref(true),
+    karyawanExpand: ref(false)
 
-    <div class="main-menu-items">
-      <div class="menu-dropdown" v-bind:class="karyawanExpand && 'dropdown-expanded'">
-        <div class="dropdown-button" @click="toggleKaryawanMenu">
-          <span class="material-symbols-outlined"> group </span>
-          <span class="menu-label">Employees</span>
-          <span class="expand-more material-symbols-outlined"> expand_more </span>
-        </div>
-        <div class="dropdown-items" v-show="karyawanExpand">
-          <Transition name="dropdown-fall">
-            <router-link class="menu-button" to="/karyawan">
-              <span class="material-symbols-outlined"> badge </span>
-              <button class="menu-label">Employee List</button>
-            </router-link>
-          </Transition>
-          </div>
-      </div>
-    </div>
-  </aside>
-</template>
+  }),
+  methods: {
+    toggleKaryawanMenu() {
+      this.karyawanExpand = !this.karyawanExpand
+    },
+
+    toggleMenu() {
+      this.$store.commit('expandSidebar')
+    },
+
+    shrinkSidebar(){
+      this.$store.commit('shrinkSidebar')
+    }
+  },
+  mounted(){
+    
+  },
+  computed : {
+    sidebarExpand(){
+      return this.$store.state.sidebarExpand
+    }
+  }
+}
+
+</script>
 
 <style lang="scss" scoped>
 $sidebarWidth: 250px;
@@ -63,50 +89,70 @@ $sidebarWidth: 250px;
 aside {
   display: flex;
   flex-direction: column;
+  position: absolute;
+  left: calc(-1 * $sidebarWidth);
   overflow: hidden;
   min-height: 100vh;
-  padding: 0.75rem;
-  width: calc(2rem + 32px);
+  padding: 0.5rem;
+  width: $sidebarWidth;
+  //width: calc(2rem + 32px);
+  transition: 0.3s ease-in-out;
   background-color: var(--light);
-  transition: 0.2s ease-out;
-  
+  z-index: 99;
+
+  &.is-expanded {
+    transform: translateX($sidebarWidth);
+  }
+
+  & .menu-toggle {
+    display: flex;
+    align-items: center;
+    @apply mx-2;
+  }
 
   .logo {
+    margin: 0.15rem;
+
     img {
       width: 2rem;
       height: 2rem;
-      display: none;
     }
   }
 
   .menu-toggle-wrap {
+    display: flex;
+
     & button {
       display: flex;
       border-radius: 50%;
       padding: 5px;
       align-items: center;
-      &:hover {
-        background-color: var(--primary);
-      }
+
+      // &:hover {
+      //   background-color: var(--primary);
+      // }
     }
+
     .material-symbols-outlined {
       font-size: 2rem;
     }
   }
 
   .main-menu-items {
-    margin: 1.5rem 0;
+    margin: 1.5rem 0.5rem;
+
     .menu-button {
       display: flex;
       align-items: center;
       border-radius: 10px;
       text-decoration: none;
       padding: 0.5rem 0.5rem;
-
+      margin: 0.5rem 0;
       transition: 0.2s ease-out;
 
       .material-symbols-outlined {
         font-size: 1.5rem;
+        margin-right: 1rem;
         color: var(--dark);
         transition: 0.2s ease-out;
       }
@@ -124,110 +170,80 @@ aside {
   }
 
   .menu-button .menu-label {
-    opacity: 0;
+    opacity: 1;
     transition: 0.3s ease-out;
   }
 
   .menu-dropdown {
+    &.dropdown-expanded {
+      & .dropdown-button {
+        & .expand-more {
+          transition: 0.2s ease-out;
+          transform: rotate(180deg);
+        }
+      }
+    }
+
     & .dropdown-button {
       display: flex;
-      padding: 0.5rem 0.5rem;
+      padding: 0 0.5rem;
       border-radius: 10px;
+
       &:hover {
         cursor: pointer;
-
       }
-    }
 
-    & .menu-label,
-    .expand-more {
-      opacity: 0;
-      transition: 0.2s ease-out;
-    }
-
-    & .dropdown-items {
-    
-      .menu-button {
-        padding: 0.2rem 0.75rem;
-      }
-      .material-symbols-outlined {
-        font-size: 1rem;
-      }
-      .menu-label {
-        white-space: nowrap;
-      }
-    }
-  }
-
-  &.is-expanded {
-    width: $sidebarWidth;
-    .menu-toggle-wrap {
-      top: -3rem;
-      display: flex;
-    }
-
-    .logo {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      transition: 0.2s ease-in-out;
-      transform: translateX(10px);
-    }
-
-    .menu-button .menu-label {
-      opacity: 1;
-      transition: 0.3s ease-out;
-    }
-
-    .main-menu-items {
       .material-symbols-outlined {
         margin-right: 1rem;
       }
 
-      .menu-dropdown {
-        & .dropdown-button {
-          & .menu-label {
-            opacity: 1;
-            transition: 0.2s ease-out;
-            flex: 2;
-          }
-          & .expand-more {
-            opacity: 1;
-            margin-right: 0;
-            text-align: right;
-            white-space: nowrap;
-          }
-        }
+      & .menu-label {
+        flex: 2;
+      }
 
-        .dropdown-items {
-         
-          & .menu-button {
-            padding: 0.2rem 2rem;
-          }
-          & .menu-label{
-            font-size: 12px;
-          }
-          & .material-symbols-outlined {
-            font-size: 1rem;
-          }
-        }
+      & .expand-more {
+        margin-right: 0;
+        text-align: right;
+        white-space: nowrap;
+        transition: 0.2s ease-out;
+      }
+    }
 
-        &.dropdown-expanded {
-          & .dropdown-button {
-            & .expand-more {
-              transition: 0.2s ease-out;
-              transform: rotate(180deg);
-            }
-          }
-        }
+
+    & .dropdown-items {
+      .menu-button {
+        padding: 0.1rem 0.75rem;
+        padding-left: 2rem;
+      }
+
+      .material-symbols-outlined {
+        font-size: 1rem;
+      }
+
+      .menu-label {
+        white-space: nowrap;
+        font-size: 12px;
       }
     }
   }
+
+  .dropdown-fall-enter-active {
+    transition: all 0.3s ease-out;
+  }
+
+  .dropdown-fall-leave-active {
+    transition: all 0.3s ease-in;
+  }
+
+  .dropdown-fall-enter-from,
+  .dropdown-fall-leave-to {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+
   @media (max-width: 768px) {
     position: fixed;
     z-index: 99;
   }
 }
-
-
 </style>

@@ -1,13 +1,19 @@
 <template>
   <nav>
     <div class="nav-path">
+      <div class="nav-toogle">
+        <v-btn density="comfortable" icon="mdi-format-list-bulleted" variant="text" @click="expandSidebar"></v-btn>
+      </div>
       <ol class="nav-path-lists">
-        <li class="inline-flex items-center">
-          <router-link to="/" class="nav-path-link">
-            <span class="material-symbols-outlined text-base mr-2"> home </span>
-            Dashboard
-          </router-link>
+        <li class="ml-0">
+          <div class="flex items-center">
+            <span class="material-symbols-outlined text-base"> home </span>
+            <router-link to="/" class="nav-path-link"> 
+              Dashboard 
+            </router-link>
+          </div>
         </li>
+    
         <span class="material-symbols-outlined text-base"> navigate_next </span>
         <li class="ml-0">
           <div class="flex items-center">
@@ -79,7 +85,7 @@
       >
         <v-btn class="notif-button" @click="showNotif">
 
-          <v-badge class="notif-count" :content="getNotifIsReadCount" color="error" v-if="getNotifIsReadCount > 0">  
+          <v-badge class="notif-count" :content="getNotifIsReadCount > 0 ? getNotifIsReadCount > 9 ? '9+': getNotifIsReadCount : ''" color="error" v-if="getNotifIsReadCount > 0">  
             <span class="material-symbols-outlined"> 
               {{ notifExpand ? "notifications_active" : "notifications" }}  
             </span>
@@ -88,10 +94,18 @@
           <span class="material-symbols-outlined" v-else> 
             {{ notifExpand ? "notifications_active" : "notifications" }}  
           </span>
-         
+
         </v-btn>
         <v-card v-show="notifExpand" class="notif-details">
-          <v-card-title> Notification </v-card-title>
+          <!-- Read All Button -->
+          <v-row style="padding: 1rem;">
+            <v-card-title> Notification </v-card-title>
+            <v-col align="right">
+              <v-btn variant="text" density="compact" @click="readAllNotif">
+                Read all
+              </v-btn>
+            </v-col>
+          </v-row>
           <v-divider :thickness="3" color="info"></v-divider>
           <v-virtual-scroll height="350" width="350" :items="notifItems">
             <template v-slot:default="{ item }">
@@ -126,18 +140,34 @@ nav {
   flex-direction: row;
   justify-content: space-between;
 
+
   & .nav-path {
-    padding: 1rem;
+    padding: 0.25rem;
+    display: flex;
+    @apply mx-2;
+
+   & .nav-toogle{
+      display: flex;
+      justify-content: center;
+      align-items : center;
+      border-radius: 50%;
+      
+      & .menu-toogle{
+        @apply p-0;
+        &:hover{
+          background-color: var(--primary);
+        }
+      }
+   }
 
     & .nav-path-lists {
       @apply inline-flex;
-      @apply items-center;
       @apply space-x-1;
+      @apply ml-3;
       @apply md:space-x-3;
-
+      align-items: center;
+      
       & .nav-path-link {
-        @apply inline-flex;
-        @apply items-center;
         @apply text-sm;
         @apply font-medium;
         @apply text-gray-700;
@@ -334,7 +364,8 @@ export default {
       //   title: 'Title',
       //   description: 'Description'
       // }
-    ]
+    ],
+    
   }),
   methods: {
     getNotification(){
@@ -344,6 +375,10 @@ export default {
       }).catch((error)=>{
         console.log(error)
       })
+    },
+
+    expandSidebar(){
+      this.$store.commit('expandSidebar')
     },
 
     // Notification
@@ -364,6 +399,24 @@ export default {
       }).catch((error)=>{
         console.log(error)
       })
+    },
+
+    readAllNotif(){
+      axios.patch(`${this.karyawanURL}/notif/readall`)
+      .then((response)=>{
+        if(response.data.Status == "Success"){
+          console.log("Success")
+          this.notifItems = this.notifItems.map(item => {
+              if (item.IsRead === false) {
+                  return { ...item, IsRead: true };
+              }
+              return item;
+          });
+          console.log(this.notifItems)
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
     }
   },
   mounted() {
@@ -373,7 +426,7 @@ export default {
     getNotifIsReadCount(){
       const notReadNotif = this.notifItems.filter(item => item.IsRead == 0)
       const notReadNotifCount = notReadNotif.length
-      return notReadNotifCount < 9 ? notReadNotifCount : '9+'
+      return notReadNotifCount
     }
   }
 }

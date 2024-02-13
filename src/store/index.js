@@ -6,12 +6,21 @@ const store = createStore({
     state: {
       // Your application's global state goes here
       selectedKaryawan : {},
-      karyawanURL : KaryawanAPIEndpoint
+      karyawanURL : KaryawanAPIEndpoint,
+      sidebarExpand : false
     },
     mutations: {
       // Mutations to modify the state go here
       selectKaryawan(state, karyawan) {
         state.selectedKaryawan = karyawan
+      },
+
+      expandSidebar(state){
+        state.sidebarExpand = !state.sidebarExpand
+      },
+      
+      shrinkSidebar(state){
+        state.sidebarExpand = false
       }
     },
     actions: {
@@ -23,6 +32,9 @@ const store = createStore({
         return this.selectedKaryawan;
       },
      
+      getSidebarExpend(){
+        return this.sidebarExpand;
+      }
     },
   });
   

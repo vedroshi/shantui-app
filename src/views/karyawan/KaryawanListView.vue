@@ -2,7 +2,8 @@
   <div>
     <div class="karyawan-header">
       <v-row justify="end" dense>
-        <v-col cols="4">
+        <!-- Search -->
+        <v-col cols="3">
           <v-text-field
             prepend-inner
             clearable
@@ -16,7 +17,24 @@
             <span class="material-symbols-outlined mr-3 mt-1"> search </span>
           </v-text-field>
         </v-col>
-        <v-col cols="3">
+
+        <v-col cols="2">
+          <v-text-field
+            hide-details
+            variant="underlined"
+            density="compact"
+            class="shrink"
+            placeholder="Akhir Kontrak"
+            readonly
+            append-inner-icon="mdi-calendar"
+            @click="togglerHandler.isEndContractFilterOpen = !togglerHandler.isEndContractFilterOpen"
+            v-model="getEndContractRange"
+          >
+          </v-text-field>
+        </v-col>
+
+        <!-- Filter Join Date -->
+        <v-col cols="2">
           <v-text-field
             hide-details
             variant="underlined"
@@ -30,6 +48,8 @@
           >
           </v-text-field>
         </v-col>
+
+        <!-- Add New Employee -->
         <v-col cols="auto" align-self="center">
           <v-btn
             rounded
@@ -105,8 +125,8 @@
               <v-card width="300" height="150"> 
                 <v-img
                   :src="karyawanURL + '/karyawan/getKTP/' + selectedKaryawan.KTP"
-                  cover
-                  class="max-height-100 width-100"
+                  contain
+                  class="height-100 width-100"
                 > 
                 </v-img>
               </v-card>
@@ -148,7 +168,7 @@
                     Log Karyawan
                   </v-btn>
                 </v-row>
-                <v-row justify="end" style="margin-bottom: 1rem">
+                <v-row justify="end" style="margin-bottom: 1rem" v-if="selectedKaryawan.Status.Status == 'Active' ">
                   <v-btn @click="downloadContract">
                     <span class="material-symbols-outlined mr-1"> download </span>
                     Download PKWT
@@ -735,6 +755,7 @@
             </template>
           </v-date-picker>
         </v-dialog>
+        <!-- <DateFilter :open="togglerHandler.isEndContractFilterOpen" :range="endContractRange" /> -->
       </div>
     </div>
     
@@ -758,6 +779,7 @@ import card_bg from '../../assets/crane_card_bg.jpg'
 import { karyawanMixin } from '../../mixins/karyawanMixin'
 import { validationMixin } from '../../mixins/validationMixin'
 import SnackbarView from '../../components/SnackbarView.vue'
+import DateFilter from '../../components/Dialogs/DateFilter.vue'
 </script>
 
 <script>
@@ -776,7 +798,8 @@ export default {
       isReturnCutiDatePickerOpen : ref(false),
       isEndCuti: ref(false),
       isDepart: ref(false),
-      isJoinDateFilterOpen: ref(false)
+      isJoinDateFilterOpen: ref(false),
+      isEndContractFilterOpen : ref(false)
     },
 
     snackbarAttribute: {
@@ -795,6 +818,11 @@ export default {
 
     joinDateRange: ref({
       start: ref(null),
+      end: ref(null)
+    }),
+
+    endContractRange : ref({
+      start:ref(null),
       end: ref(null)
     }),
 
@@ -818,11 +846,6 @@ export default {
         key: 'Position.Name'
       },
       {
-        title: 'Penempatan',
-        align: 'center',
-        key: 'Company.Site.Name'
-      },
-      {
         title: 'Mulai Kontrak',
         align: 'center',
         key: 'Status.Start'
@@ -843,231 +866,6 @@ export default {
         key: 'Application.Application_Status'
       }
     ],
-
-    
-    // employees: [
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Andy',
-    //     DOB: '1998-10-13',
-    //     POB: 'Jakarta',
-    //     Address: 'Jl. ',
-    //     Join_Date: '2020-10-19',
-    //     Position: {
-    //       Name : 'Operator Crane',
-    //       Tonnage : '55'
-    //     },
-    //     Company : {
-    //       Name : 'PT.',
-    //       Site : {
-    //         Name : 'Morowali'
-    //       }
-    //     },
-    //     Status : {
-    //       Status: 'Active',
-    //       Start: '2023-07-20',
-    //       End: '2023-01-20',
-
-    //     },
-    //     Application: {
-    //       Application_Type: null,
-    //       Application_Status: null,
-    //       Start_Contract: null,
-    //       End_Contract: null,
-    //       Start_Cuti: null,
-    //       End_Cuti: null,
-    //       Depart: null,
-    //       Arrival: null,
-    //       Resign_Date: null
-    //     }
-    //   },
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Bob',
-    //     DOB: '1994-01-04',
-    //     POB: 'Makassar',
-    //     Address: 'Jl. ',
-    //     Position: {
-    //       Name : 'Operator Crane',
-    //       Tonnage : '80'
-    //     },
-    //     Company : {
-    //       Name : 'PT',
-    //       Site : {
-    //         Name : 'Morowali'
-    //       }
-    //     },
-    //     Join_Date: '2020-09-13',
-    //     Status : {
-    //       Status: 'Close Project',
-    //       Start: '2023-03-13',
-    //       End: '2023-09-13',
-    //     },
-    //     Application: {
-    //       Application_Status: -1,
-    //       Application_Type: 'Kompensasi',
-    //       Start_Contract: '2023-04-09',
-    //       End_Contract: '2023-10-09',
-    //       Start_Cuti: null,
-    //       End_Cuti: null,
-    //       Depart: null,
-    //       Arrival: null,
-    //       Resign_Date: null
-    //     }
-    //   },
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Alice',
-    //     DOB: '1994-04-19',
-    //     POB: 'Tangerang',
-    //     Address: 'Jl. ',
-    //     Position : {
-    //       Name : "Jubir"
-    //     },
-    //     Company : {
-    //       Name : 'PT',
-    //       Site : {
-    //         Name : 'Morowali'
-    //       }
-    //     },
-    //     Join_Date: '2020-10-09',
-    //     Status : {
-    //       Status: 'Warning',
-    //       Start: '2023-04-27',
-    //       End: '2023-10-27',
-    //     },
-    //     Application: {
-    //       Application_Status: -1,
-    //       Application_Type: 'Cuti',
-    //       Start_Contract: null,
-    //       End_Contract: null,
-    //       Start_Cuti: '2023-10-28',
-    //       End_Cuti: null,
-    //       Depart: null,
-    //       Arrival: null,
-    //       Resign_Date: null
-    //     }
-    //   },
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Bobby',
-    //     DOB: '1994-06-20',
-    //     POB: 'Denpasar',
-    //     Address: 'Jl. ',
-    //     Position: {
-    //       Name : 'Mekanik Junior'
-    //     },
-    //     Company : {
-    //       Name : 'PT',
-    //       Site : {
-    //         Name : 'Morowali'
-    //       }
-    //     },
-    //     Join_Date: '2020-10-19',
-    //     Status: {
-    //       Status : 'Cuti',
-    //       Start: '2023-04-19',
-    //       End: null,
-    //     },
-    //     Application: {
-    //       Application_Status: null,
-    //       Application_Type: null,
-    //       Start_Contract: null,
-    //       End_Contract: null,
-    //       Start_Cuti: '2023-04-27',
-    //       End_Cuti: null,
-    //       Depart: null,
-    //       Arrival: null,
-    //       Resign_Date: null
-    //     }
-    //   },
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Connie',
-    //     DOB: '1999-05-10',
-    //     POB: 'Kendari',
-    //     Address: 'Jl. ',
-    //     Position: {
-    //       Name : 'Admin',
-    //     },
-    //     Company : {
-    //       Name : 'PT',
-    //       Site : {
-    //         Name : 'Morowali'
-    //       }
-    //     },
-    //     Join_Date: '2023-10-20',
-    //     Status: {
-    //       Status : 'Cuti',
-    //       Start: '2023-10-10',
-    //       End: '2023-10-24',
-    //     },
-    //     Application: {
-    //       Application_Status: null,
-    //       Application_Type: null,
-    //       Start_Contract: null,
-    //       End_Contract: null,
-    //       Start_Cuti: '2023-10-24',
-    //       End_Cuti: '2023-10-24',
-    //       Depart: 'Kendari',
-    //       Arrival: 'Jakarta',
-    //       Resign_Date: null
-    //     }
-    //   },
-    //   {
-    //     NIK: '1200012232500021',
-    //     Name: 'Conrad',
-    //     DOB: '1989-10-05',
-    //     POB: 'Manado',
-    //     Address: 'Jl. ',
-    //     Position: {
-    //       Name : 'Tyremen'
-    //     },
-    //     Company: {
-    //       Name : 'PT',
-    //       Site : {
-    //         Name : 'Morowali',
-    //       }
-    //     },
-    //     Join_Date: '2019-04-24',
-    //     Status: {
-    //       Status : 'Resign',
-    //       Start: '2023-04-30',
-    //       End: null,
-    //     },
-    //     Application: {
-    //       Application_Status: null,
-    //       Application_Type: null,
-    //       Start_Contract: null,
-    //       End_Contract: null,
-    //       Start_Cuti: null,
-    //       End_Cuti: null,
-    //       Depart: null,
-    //       Arrival: null,
-    //       Resign_Date: null
-    //     }
-    //   }
-    // ],
-
-    // messages: [
-    //   {
-    //     CreatedAt: '2023-10-10',
-    //     Start: '24/10/2023',
-    //     End: '24/10/2023',
-    //     Message: `Ajukan Kompensasi`,
-    //     Color: 'deep-purple-lighten-1'
-    //   },
-    //   {
-    //     CreatedAt: '2023-10-15',
-    //     Message: `Ajukan Kompensasi Disetujui`,
-    //     Color: 'green'
-    //   },
-    //   {
-    //     CreatedAt: '2023-10-24',
-    //     Message: `Lanjut Kontrak`,
-    //     Color: 'blue-lighten-1'
-    //   }
-    // ]
 
   }),
   watch: {
@@ -1095,6 +893,13 @@ export default {
       this.joinDateRange.start = null
       this.joinDateRange.end = null
       this.togglerHandler.isJoinDateFilterOpen = false
+    },
+
+    // Clear End Contract Range
+    clearEndContractRange() {
+      this.endContractRange.start = null
+      this.endContractRange.end = null
+      this.togglerHandler.isEndContractFilterOpen = false
     },
 
     // Karyawan Details Dialog
@@ -1418,6 +1223,15 @@ export default {
       if (this.joinDateRange.start && this.joinDateRange.end) {
         return `${moment(this.joinDateRange.start).format('DD/MM/YYYY')} - ${moment(
           this.joinDateRange.end
+        ).format('DD/MM/YYYY')}`
+      }
+      return null
+    },
+    
+    getEndContractRange() {
+      if (this.endContractRange.start && this.endContractRange.end) {
+        return `${moment(this.endContractRange.start).format('DD/MM/YYYY')} - ${moment(
+          this.endContractRange.end
         ).format('DD/MM/YYYY')}`
       }
       return null
