@@ -405,14 +405,13 @@ export default {
       axios.patch(`${this.karyawanURL}/notif/readall`)
       .then((response)=>{
         if(response.data.Status == "Success"){
-          console.log("Success")
+
           this.notifItems = this.notifItems.map(item => {
               if (item.IsRead === false) {
                   return { ...item, IsRead: true };
               }
               return item;
           });
-          console.log(this.notifItems)
         }
       }).catch((error)=>{
         console.log(error)

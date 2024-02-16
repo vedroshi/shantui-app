@@ -412,7 +412,7 @@ export default {
           applyFormData.Arrival = this.applyData.Arrival
           // Check if the employee is depart during "Cuti"
         }else if (applyFormData.Application_Type == "Resign"){
-          applyFormData.Resign_Date = this.isDateNullAndConvert(this.applyData.Resign_Date)
+          applyFormData.Start = this.isDateNullAndConvert(this.applyData.Resign_Date)
         }
         
         if(!this.togglerHandler.isDepart || applyFormData.Application_Type != "Cuti"){

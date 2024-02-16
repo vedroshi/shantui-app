@@ -72,7 +72,7 @@
           class="elavation-1"
           density="compact"
           item-key="NIK"
-          height="70vh"
+          height="73vh"
           @click:row="expandKaryawanDialog"
           clearable
           hover
@@ -322,9 +322,8 @@
             </div>
 
             <div class="karyawan-actions">
-              <v-row
+              <v-row v-if="selectedKaryawan.Application.Application_Status == 'Pending'"
                 style="margin: 1rem"
-                v-if="selectedKaryawan.Application.Application_Status == 'Pending'"
               >
                 <v-col cols="auto">
                   <v-btn @click="approveForm"> Pengajuan Disetujui </v-btn>
@@ -339,15 +338,15 @@
               <v-row style="margin: 1rem" v-else-if="selectedKaryawan.Status.Status == 'Cuti'">
                 <v-col cols="auto">
                   <v-btn @click="openReturnDateDialog">
-                    {{ selectedKaryawan.Status.End ? 'Edit Return Date' : 'Set Return Date' }}
+                    {{ selectedKaryawan.Status.End ? 'Ubah Balik Cuti' : 'Atur Balik Cuti' }}
                   </v-btn>
                 </v-col>
               </v-row>
               <v-row
-                style="margin: 1rem"
                 v-else-if="
                   ( !selectedKaryawan.Application.Application_Status && selectedKaryawan.Status.Status != 'Resign' && selectedKaryawan.Status.Status != 'Cut Off')
                 "
+                style="margin: 1rem"
               >
                 <v-col cols="auto">
                   <v-btn
@@ -359,6 +358,11 @@
                     "
                   >
                     Ajukan Form
+                  </v-btn>
+                </v-col>
+                <v-col cols="auto">
+                  <v-btn @click="togglerHandler.isCutOffDialogOpen = true">
+                    Cut Off
                   </v-btn>
                 </v-col>
               </v-row>
@@ -385,12 +389,12 @@
               >
                 <v-row dense>
                   <v-col>
-                    <b> Name : {{ selectedKaryawan.Name }} </b>
+                    <b> Nama : {{ selectedKaryawan.Name }} </b>
                   </v-col>
                 </v-row>
                 <v-row dense>
                   <v-col>
-                    <b> Position : {{ selectedKaryawan.Position.Name }} </b>
+                    <b> Jabatan : {{ selectedKaryawan.Position.Name }} </b>
                   </v-col>
                 </v-row>
               </v-card>
@@ -742,6 +746,61 @@
           </v-card>
         </v-dialog>
 
+         <!-- Cut Off Dialog -->
+         <v-dialog v-model="togglerHandler.isCutOffDialogOpen" width="auto">
+          <v-card width="700">
+            <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
+                <v-toolbar-title class="text-h6"> Cut Off </v-toolbar-title>
+                <template v-slot:append>
+                  <v-btn @click="closeCutOffDialog" icon="Close">
+                    <span class="material-symbols-outlined"> close </span>
+                  </v-btn>
+                </template>
+            </v-toolbar>
+            <v-container>
+              <v-form ref="cutoffForm" lazy-validate>
+                <v-row>
+                  <v-col>
+                    <v-list-item-title>Tanggal Cut Off</v-list-item-title>
+                    <v-list-item-subtitle> <i>Date of Cut Off</i> </v-list-item-subtitle>
+                    <v-text-field
+                      v-model="cutOffFormData.Date"
+                      variant="underlined"
+                      density="compact"
+                      append-inner-icon="mdi-calendar"
+                      @click:appendInner="
+                        togglerHandler.isCutOffDatePickerOpen = true
+                      "
+                      placeholder="DD/MM/YYYY"
+                      clearable
+                      required
+                      :rules="[
+                        (value) => this.required(value),
+                        (value) => this.isDateValid(value),
+                      ]"
+                    ></v-text-field>
+                    <VDatePicker
+                      v-model.string="cutOffFormData.Date"
+                      mode="date"
+                      @dayclick="togglerHandler.isCutOffDatePickerOpen = false"
+                      :masks="dateFormat"
+                      v-if="togglerHandler.isCutOffDatePickerOpen"
+                    >
+                    </VDatePicker>
+                  </v-col>
+                </v-row>
+              </v-form>
+            </v-container>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" variant="text" @click="closeCutOffDialog">
+                Close
+              </v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="submitCutOffForm"> Save </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
         <!-- Filter Join Date Dialog -->
         <v-dialog v-model="togglerHandler.isJoinDateFilterOpen" width="auto">
           <v-date-picker v-model.range="joinDateRange">
@@ -755,7 +814,21 @@
             </template>
           </v-date-picker>
         </v-dialog>
-        <!-- <DateFilter :open="togglerHandler.isEndContractFilterOpen" :range="endContractRange" /> -->
+
+        <!-- Filter End Contract Dialog -->
+        <v-dialog v-model="togglerHandler.isEndContractFilterOpen" width="auto">
+          <v-date-picker v-model.range="endContractRange">
+            <template #footer>
+              <v-btn
+                style="background-color: var(--secondary); width: auto; margin: 1rem"
+                @click="clearEndContractRange"
+              >
+                Clear
+              </v-btn>
+            </template>
+          </v-date-picker>
+        </v-dialog>
+        
       </div>
     </div>
     
@@ -779,7 +852,7 @@ import card_bg from '../../assets/crane_card_bg.jpg'
 import { karyawanMixin } from '../../mixins/karyawanMixin'
 import { validationMixin } from '../../mixins/validationMixin'
 import SnackbarView from '../../components/SnackbarView.vue'
-import DateFilter from '../../components/Dialogs/DateFilter.vue'
+
 </script>
 
 <script>
@@ -799,7 +872,9 @@ export default {
       isEndCuti: ref(false),
       isDepart: ref(false),
       isJoinDateFilterOpen: ref(false),
-      isEndContractFilterOpen : ref(false)
+      isEndContractFilterOpen : ref(false),
+      isCutOffDialogOpen : ref(false),
+      isCutOffDatePickerOpen : ref(false)
     },
 
     snackbarAttribute: {
@@ -813,6 +888,7 @@ export default {
     editFormData: ref({}),
     setReturnData: ref({}),
     extendFormData: ref({}),
+    cutOffFormData : ref({}),
 
     search: ref(''),
 
@@ -869,6 +945,7 @@ export default {
 
   }),
   watch: {
+    // Clear the form if "Application_Type" is changed
     'editFormData.Application_Type': function (newType, oldType) {
       this.resetApplicationForm(this.editFormData, this.togglerHandler, newType, oldType)
     }
@@ -1002,6 +1079,11 @@ export default {
       this.togglerHandler.isReturnCutiDatePickerOpen = false
     },
 
+    closeCutOffDialog(){
+      this.cutOffFormData.Date = null;
+      this.togglerHandler.isCutOffDialogOpen = false;
+    },
+
     // Get Log Dates to filter the log message
     getLogDates(messages) {
       const uniqueDates = [...new Set(messages.map((message) => this.revertDate(message.CreatedAt)))]
@@ -1101,7 +1183,7 @@ export default {
             this.selectedKaryawan.Status.Start = response.data.start
             this.selectedKaryawan.Status.End = null
             this.selectedKaryawan.Logs.push({
-              CreatedAt : this.revertDate(this.selectedKaryawan.Status.Start),
+              CreatedAt : this.selectedKaryawan.Status.Start,
               Message : `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
               Type : "Cut Off",
             })
@@ -1111,6 +1193,31 @@ export default {
           })
         }
       }
+    },
+
+    async submitCutOffForm(){
+      const { valid } = await this.$refs.cutoffForm.validate()
+
+      if(valid){
+        this.cutOffFormData.Date = this.convertDate(this.cutOffFormData.Date)
+        // Cut Off
+        await axios.post(`${this.karyawanURL}/status/cutoff/${this.selectedKaryawan.ID}`,
+          this.cutOffFormData
+          ).then((response)=>{
+            this.closeCutOffDialog()
+            this.selectedKaryawan.Status.Status = "Cut Off"
+            this.selectedKaryawan.Status.Start = response.data.start
+            this.selectedKaryawan.Status.End = null
+            this.selectedKaryawan.Logs.push({
+              CreatedAt : this.selectedKaryawan.Status.Start,
+              Message : `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
+              Type : "Cut Off",
+            })
+            this.openSnackbar(true, response.data.message)
+          }).catch((error) =>{
+            this.openSnackbar(false, error.data.message)
+          })
+      } 
     },
 
     async approveForm() {
@@ -1193,7 +1300,6 @@ export default {
     }
     
   },
-
   created() {
     this.getAllEmployees()
   },
@@ -1202,10 +1308,27 @@ export default {
     filteredEmployees() {
       const start = this.joinDateRange.start
       const end = this.joinDateRange.end
+
+      const endContractStart = this.endContractRange.start
+      const endContractEnd = this.endContractRange.end
+
+      // Filter Join Date
       if (start && end) {
         return this.employees.filter((employee) => {
           const joinDate = this.getDateObj(employee.Join_Date)
           return joinDate >= start && joinDate <= end
+        })
+      }
+
+      // Filter End Contract
+      if (endContractStart && endContractEnd) {
+        return this.employees.filter((employee) => {
+          if (employee.Status.End === null) {
+            return false; // Skip filtering for this employee
+          }
+
+          const endContract = this.getDateObj(employee.Status.End)
+          return endContract >= endContractStart && endContract <= endContractEnd
         })
       }
       return this.employees

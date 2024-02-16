@@ -97,6 +97,9 @@ export const karyawanMixin = {
             formData.Resign_Date = null;
         },
 
+        resetCutOffForm(formData){
+            formData.Date = null;
+        }
     },
     computed : {
        
