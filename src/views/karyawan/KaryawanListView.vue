@@ -4,58 +4,46 @@
       <v-row justify="end" dense>
         <!-- Search -->
         <v-col cols="3">
-          <v-text-field
-            prepend-inner
-            clearable
-            hide-details
-            variant="underlined"
-            density="compact"
-            clear-icon="$cancel"
-            class="shrink"
-            v-model="search"
-          >
+          <v-text-field prepend-inner clearable hide-details variant="underlined" density="compact" clear-icon="$cancel"
+            class="shrink" v-model="search">
             <span class="material-symbols-outlined mr-3 mt-1"> search </span>
           </v-text-field>
         </v-col>
 
+        <v-col cols="3">
+          <v-select v-model="status" :items="statusList" clearable label="Status" multiple density="compact"
+            variant="underlined">
+            <template v-slot:selection="{ item, index }">
+              <v-chip v-if="index < 3" :color="getColor(item.title)" size='x-small'>
+                <span>{{ item.title }}</span>
+              </v-chip>
+              <span v-if="index === 3" class="text-grey text-caption align-self-center">
+                (+{{ status.length - 3 }} others)
+              </span>
+            </template>
+          </v-select>
+        </v-col>
+
         <v-col cols="2">
-          <v-text-field
-            hide-details
-            variant="underlined"
-            density="compact"
-            class="shrink"
-            placeholder="Akhir Kontrak"
-            readonly
-            append-inner-icon="mdi-calendar"
+          <v-text-field hide-details variant="underlined" density="compact" class="shrink" placeholder="Akhir Kontrak"
+            readonly append-inner-icon="mdi-calendar"
             @click="togglerHandler.isEndContractFilterOpen = !togglerHandler.isEndContractFilterOpen"
-            v-model="getEndContractRange"
-          >
+            v-model="getEndContractRange">
           </v-text-field>
         </v-col>
 
         <!-- Filter Join Date -->
         <v-col cols="2">
-          <v-text-field
-            hide-details
-            variant="underlined"
-            density="compact"
-            class="shrink"
-            placeholder="Tanggal Join"
-            readonly
-            append-inner-icon="mdi-calendar"
+          <v-text-field hide-details variant="underlined" density="compact" class="shrink" placeholder="Tanggal Join"
+            readonly append-inner-icon="mdi-calendar"
             @click="togglerHandler.isJoinDateFilterOpen = !togglerHandler.isJoinDateFilterOpen"
-            v-model="getJoinDateRange"
-          >
+            v-model="getJoinDateRange">
           </v-text-field>
         </v-col>
 
         <!-- Add New Employee -->
         <v-col cols="auto" align-self="center">
-          <v-btn
-            rounded
-            style="background-color: var(--primary)"
-            @click="this.$router.push('karyawan/create')"
-          >
+          <v-btn rounded style="background-color: var(--primary)" @click="this.$router.push('karyawan/create')">
             <span class="material-symbols-outlined"> add </span>
           </v-btn>
         </v-col>
@@ -65,23 +53,13 @@
       <div class="karyawan-table">
 
         <!-- Karyawan Data table -->
-        <v-data-table
-          :headers="headers"
-          :items="filteredEmployees"
-          :search="search"
-          class="elavation-1"
-          density="compact"
-          item-key="NIK"
-          height="73vh"
-          @click:row="expandKaryawanDialog"
-          clearable
-          hover
-        >
+        <v-data-table :headers="headers" :items="filteredEmployees" :search="search" class="elavation-1" density="compact"
+          item-key="NIK" height="70vh" @click:row="expandKaryawanDialog" clearable hover>
 
           <template v-slot:[`item.Status.Start`]="{ value }">
             {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
-          
+
           <template v-slot:[`item.Status.End`]="{ value }">
             {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
           </template>
@@ -91,14 +69,14 @@
               {{ value }}
             </v-chip>
           </template>
-          
+
           <template v-slot:[`item.Application.Application_Status`]="{ value, item }">
             {{
               value && item.Application.Application_Type != "Return"
-                ? `Ajukan ${item.Application.Application_Type} (${item.Application.Application_Status})`
-                : item.Status.Status == 'Cuti' ||
-                  item.Status.Status == 'Resign' ||
-                  item.Status.Status == 'Cut Off'
+              ? `Ajukan ${item.Application.Application_Type} (${item.Application.Application_Status})`
+              : item.Status.Status == 'Cuti' ||
+                item.Status.Status == 'Resign' ||
+                item.Status.Status == 'Cut Off'
                 ? `${item.Status.Status} tanggal ${moment(getDateObj(item.Status.Start)).format('DD MMMM YYYY')}`
                 : 'Belum Ajukan Form'
             }}
@@ -106,13 +84,8 @@
         </v-data-table>
 
         <!-- Karyawan Details Dialog  -->
-        <v-dialog
-          v-model="togglerHandler.karyawanExpand"
-          fullscreen
-          scrollable
-          :scrim="false"
-          transition="dialog-bottom-transition"
-        >
+        <v-dialog v-model="togglerHandler.karyawanExpand" fullscreen scrollable :scrim="false"
+          transition="dialog-bottom-transition">
           <v-toolbar dark style="background-color: var(--primary)">
             <v-btn icon dark @click="shrinkKaryawanDialog">
               <span class="material-symbols-outlined"> close </span>
@@ -122,12 +95,9 @@
           <v-sheet class="karyawan-details">
             <v-row style="margin: 1rem">
               <!-- KTP Image -->
-              <v-card width="300" height="150"> 
-                <v-img
-                  :src="karyawanURL + '/karyawan/getKTP/' + selectedKaryawan.KTP"
-                  contain
-                  class="height-100 width-100"
-                > 
+              <v-card width="300" height="150">
+                <v-img :src="karyawanURL + '/karyawan/getKTP/' + selectedKaryawan.KTP" contain
+                  class="height-100 width-100">
                 </v-img>
               </v-card>
               <!-- Header Profile -->
@@ -152,10 +122,9 @@
                   <div v-if="selectedKaryawan.Position.Tonnage">
                     <v-list-item>
                       <v-list-item-subtitle>Tonase</v-list-item-subtitle>
-                      <v-list-item-title
-                        >{{ selectedKaryawan.Position.Name == "Operator Excavator" ? 'PC' : ''}} 
-                        {{ selectedKaryawan.Position.Tonnage }} 
-                        {{ selectedKaryawan.Position.Name == "Operator Excavator" ? '' : 'Ton'}}
+                      <v-list-item-title>{{ selectedKaryawan.Position.Name == "Operator Excavator" ? 'PC' : '' }}
+                        {{ selectedKaryawan.Position.Tonnage }}
+                        {{ selectedKaryawan.Position.Name == "Operator Excavator" ? '' : 'Ton' }}
                       </v-list-item-title>
                     </v-list-item>
                   </div>
@@ -168,7 +137,7 @@
                     Log Karyawan
                   </v-btn>
                 </v-row>
-                <v-row justify="end" style="margin-bottom: 1rem" v-if="selectedKaryawan.Status.Status == 'Active' ">
+                <v-row justify="end" style="margin-bottom: 1rem" v-if="selectedKaryawan.Status.Status == 'Active'">
                   <v-btn @click="downloadContract">
                     <span class="material-symbols-outlined mr-1"> download </span>
                     Download PKWT
@@ -179,10 +148,8 @@
             <div class="karyawan-profile">
               <v-list-item>
                 <v-list-item-subtitle>Tempat, Tanggal Lahir</v-list-item-subtitle>
-                <v-list-item-title
-                  >{{ selectedKaryawan.POB }},
-                  {{ formatDate(selectedKaryawan.DOB) }}</v-list-item-title
-                >
+                <v-list-item-title>{{ selectedKaryawan.POB }},
+                  {{ formatDate(selectedKaryawan.DOB) }}</v-list-item-title>
               </v-list-item>
 
               <v-list-item>
@@ -190,10 +157,22 @@
                 <v-list-item-title>{{ selectedKaryawan.Address }}</v-list-item-title>
               </v-list-item>
 
-              <v-list-item>
-                <v-list-item-subtitle>Penempatan</v-list-item-subtitle>
-                <v-list-item-title>{{ selectedKaryawan.Company.Site.Name }}</v-list-item-title>
-              </v-list-item>
+              <v-row>
+                <v-col cols="auto">
+                  <v-list-item>
+                    <v-list-item-subtitle>User</v-list-item-subtitle>
+                    <v-list-item-title>{{ selectedKaryawan.Company.Name }}</v-list-item-title>
+                  </v-list-item>
+                </v-col>
+                <v-col cols="auto">
+                  <v-list-item>
+                    <v-list-item-subtitle>Site</v-list-item-subtitle>
+                    <v-list-item-title>{{ selectedKaryawan.Company.Site.Name }}</v-list-item-title>
+                  </v-list-item>
+                </v-col>
+
+              </v-row>
+
 
               <!-- Join Date -->
               <v-list-item>
@@ -204,15 +183,13 @@
               <!-- Contract Date -->
               <v-row align="center" style="margin: 0.05rem">
                 <v-list-item>
-                  <v-list-item-subtitle
-                    >
+                  <v-list-item-subtitle>
                     {{
-                      selectedKaryawan.Status.Status == 'Cuti' ? 'Mulai Cuti':
-                      selectedKaryawan.Status.Status == 'Resign' ? 'Tanggal Resign':
-                      selectedKaryawan.Status.Status == 'Cut Off' ? 'Tanggal Cut Off':
-                      'Mulai Kontrak'
-                    }}</v-list-item-subtitle
-                  >
+                      selectedKaryawan.Status.Status == 'Cuti' ? 'Mulai Cuti' :
+                      selectedKaryawan.Status.Status == 'Resign' ? 'Tanggal Resign' :
+                        selectedKaryawan.Status.Status == 'Cut Off' ? 'Tanggal Cut Off' :
+                          'Mulai Kontrak'
+                    }}</v-list-item-subtitle>
                   <v-list-item-title>{{
                     formatDate(selectedKaryawan.Status.Start)
                   }}</v-list-item-title>
@@ -220,8 +197,7 @@
                 <div v-if="selectedKaryawan.Status.End" style="display: flex; align-items: center">
                   Sampai
                   <v-list-item>
-                    <v-list-item-subtitle
-                      >Akhir {{ selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
+                    <v-list-item-subtitle>Akhir {{ selectedKaryawan.Status.Status == 'Cuti' ? 'Cuti' : 'Kontrak' }}
                     </v-list-item-subtitle>
                     <v-list-item-title>{{
                       formatDate(selectedKaryawan.Status.End)
@@ -234,11 +210,7 @@
                 <!-- Employee Status -->
                 <v-list-item>
                   <v-list-item-subtitle>Status</v-list-item-subtitle>
-                  <v-chip
-                    :color="getColor(selectedKaryawan.Status.Status)"
-                    variant="flat"
-                    style="margin-top: 5px"
-                  >
+                  <v-chip :color="getColor(selectedKaryawan.Status.Status)" variant="flat" style="margin-top: 5px">
                     {{ selectedKaryawan.Status.Status }}
                   </v-chip>
                 </v-list-item>
@@ -250,17 +222,15 @@
                     {{
                       selectedKaryawan.Application.Application_Type &&
                       selectedKaryawan.Application.Application_Status
-                        ? `Ajukan ${selectedKaryawan.Application.Application_Type} (${selectedKaryawan.Application.Application_Status})`
-                        : '-'
+                      ? `Ajukan ${selectedKaryawan.Application.Application_Type}
+                                        (${selectedKaryawan.Application.Application_Status})`
+                      : '-'
                     }}
                   </v-list-item>
                 </div>
 
                 <!-- Show the Application Date -->
-                <div
-                  v-if="selectedKaryawan.Application.Application_Type == 'Kompensasi'"
-                  style="display: flex"
-                >
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Kompensasi'" style="display: flex">
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Lanjut Kontrak</v-list-item-subtitle>
                     {{ formatDate(selectedKaryawan.Application.Start) }} -
@@ -268,10 +238,7 @@
                   </v-list-item>
                 </div>
 
-                <div
-                  v-if="selectedKaryawan.Application.Application_Type == 'Cuti'"
-                  style="display: flex"
-                >
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Cuti'" style="display: flex">
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Mulai Cuti</v-list-item-subtitle>
                     {{ formatDate(selectedKaryawan.Application.Start) }}
@@ -290,10 +257,7 @@
                   </v-list-item>
                 </div>
 
-                <div
-                  v-if="selectedKaryawan.Application.Application_Type == 'Resign'"
-                  style="display: flex"
-                >
+                <div v-if="selectedKaryawan.Application.Application_Type == 'Resign'" style="display: flex">
                   <v-list-item>
                     <v-list-item-subtitle>Tanggal Resign</v-list-item-subtitle>
                     {{ formatDate(selectedKaryawan.Application.Start) }}
@@ -301,14 +265,10 @@
                 </div>
 
                 <!-- Depart and Arrival when employee is 'Cuti' -->
-                <div
-                  style="display: flex"
-                  v-else-if="
-                    selectedKaryawan.Status.Status == 'Cuti' &&
-                    selectedKaryawan.Application.Depart &&
-                    selectedKaryawan.Application.Arrival
-                  "
-                >
+                <div style="display: flex" v-else-if="selectedKaryawan.Status.Status == 'Cuti' &&
+                  selectedKaryawan.Application.Depart &&
+                  selectedKaryawan.Application.Arrival
+                  ">
                   <v-list-item>
                     <v-list-item-subtitle> Keberangkatan </v-list-item-subtitle>
                     {{ selectedKaryawan.Application.Depart }}
@@ -322,9 +282,7 @@
             </div>
 
             <div class="karyawan-actions">
-              <v-row v-if="selectedKaryawan.Application.Application_Status == 'Pending'"
-                style="margin: 1rem"
-              >
+              <v-row v-if="selectedKaryawan.Application.Application_Status == 'Pending'" style="margin: 1rem">
                 <v-col cols="auto">
                   <v-btn @click="approveForm"> Pengajuan Disetujui </v-btn>
                 </v-col>
@@ -342,21 +300,15 @@
                   </v-btn>
                 </v-col>
               </v-row>
-              <v-row
-                v-else-if="
-                  ( !selectedKaryawan.Application.Application_Status && selectedKaryawan.Status.Status != 'Resign' && selectedKaryawan.Status.Status != 'Cut Off')
-                "
-                style="margin: 1rem"
-              >
+              <v-row v-else-if="(!selectedKaryawan.Application.Application_Status && selectedKaryawan.Status.Status != 'Resign' && selectedKaryawan.Status.Status != 'Cut Off')
+                " style="margin: 1rem">
                 <v-col cols="auto">
-                  <v-btn
-                    @click="
-                      this.$router.push({
-                        name: 'Pengajuan',
-                        query: { name: selectedKaryawan.Name }
-                      })
-                    "
-                  >
+                  <v-btn @click="
+                    this.$router.push({
+                      name: 'Pengajuan',
+                      query: { name: selectedKaryawan.Name }
+                    })
+                    ">
                     Ajukan Form
                   </v-btn>
                 </v-col>
@@ -382,11 +334,7 @@
                   </v-btn>
                 </template>
               </v-toolbar>
-              <v-card
-                style="padding: 1rem; position: absolute; bottom: 0"
-                color="rgba(0, 0, 0, 0)"
-                variant="flat"
-              >
+              <v-card style="padding: 1rem; position: absolute; bottom: 0" color="rgba(0, 0, 0, 0)" variant="flat">
                 <v-row dense>
                   <v-col>
                     <b> Nama : {{ selectedKaryawan.Name }} </b>
@@ -407,24 +355,19 @@
                   <v-timeline density="compact" align="start" line-inset="0">
                     <v-timeline-item
                       v-for="log in selectedKaryawan.Logs.filter((log) => revertDate(log.CreatedAt) == date).reverse()"
-                      :key="log.CreatedAt"
-                      :dot-color="
-                        log.Type == 'Contract' ? 'green' : 
-                        log.Type == 'Cuti' ? 'yellow' :
-                        log.Type == 'Apply' ? 'blue-lighten-1' : 
-                        log.Type == 'Resign' ? 'black' : 
-                        log.Type == 'Edit' ? 'blue' :
-                        log.Type == 'Accept' ? 'green-lighten-3' : 
-                        log.Type == 'Reject' ? 'red' :
-                        'grey'
-                      "
-                      size="x-small"
-                    >
+                      :key="log.CreatedAt" :dot-color="log.Type == 'Contract' ? 'green' :
+                          log.Type == 'Cuti' ? 'yellow' :
+                            log.Type == 'Apply' ? 'blue-lighten-1' :
+                              log.Type == 'Resign' ? 'black' :
+                                log.Type == 'Edit' ? 'blue' :
+                                  log.Type == 'Accept' ? 'green-lighten-3' :
+                                    log.Type == 'Reject' ? 'red' :
+                                      'grey'
+                        " size="x-small">
                       <div class="mb-4">
                         <div>{{ log.Message }}</div>
                         <div class="font-weight-normal" v-if="log.Type == 'Contract'">
-                          <strong
-                            >{{ log.Start ? revertDate(log.Start) : '' }} {{ log.End ? '-' : '' }}
+                          <strong>{{ log.Start ? revertDate(log.Start) : '' }} {{ log.End ? '-' : '' }}
                             {{ log.End ? revertDate(log.End) : '' }}
                           </strong>
                         </div>
@@ -459,17 +402,9 @@
               </v-row>
               <v-form ref="editForm" lazy-validation>
                 <v-row dense>
-                  <v-radio-group
-                    v-model="editFormData.Application_Type"
-                    density="compact"
-                    style="margin-top: 10px"
-                    inline
-                  >
-                    <v-radio
-                      label="Kompensasi"
-                      value="Kompensasi"
-                      style="margin-right: 1rem"
-                    ></v-radio>
+                  <v-radio-group v-model="editFormData.Application_Type" density="compact" style="margin-top: 10px"
+                    inline>
+                    <v-radio label="Kompensasi" value="Kompensasi" style="margin-right: 1rem"></v-radio>
                     <v-radio label="Cuti" value="Cuti" style="margin-right: 1rem"></v-radio>
                     <v-radio label="Resign" value="Resign" style="margin-right: 1rem"></v-radio>
                   </v-radio-group>
@@ -483,12 +418,8 @@
                         <v-list-item-subtitle>
                           <i> Start Contract </i>
                         </v-list-item-subtitle>
-                        <v-text-field
-                          readonly
-                          variant="underlined"
-                          density="compact"
-                          v-model="editFormData.Start_Contract"
-                        >
+                        <v-text-field readonly variant="underlined" density="compact"
+                          v-model="editFormData.Start_Contract">
                         </v-text-field>
                       </v-col>
                       <v-col>
@@ -496,12 +427,7 @@
                         <v-list-item-subtitle>
                           <i> End Contract </i>
                         </v-list-item-subtitle>
-                        <v-text-field
-                          readonly
-                          variant="underlined"
-                          density="compact"
-                          v-model="editFormData.End_Contract"
-                        >
+                        <v-text-field readonly variant="underlined" density="compact" v-model="editFormData.End_Contract">
                         </v-text-field>
                       </v-col>
                     </v-row>
@@ -511,68 +437,38 @@
                       <v-col v-click-outside="closeStartCutiDatePicker">
                         <v-list-item-title>Tanggal Cuti</v-list-item-title>
                         <v-list-item-subtitle> <i> Leave Date </i> </v-list-item-subtitle>
-                        <v-text-field
-                          v-model="editFormData.Start_Cuti"
-                          variant="underlined"
-                          density="compact"
-                          append-inner-icon="mdi-calendar"
-                          @click:appendInner="openStartCutiDatePicker"
-                          placeholder="DD/MM/YYYY"
-                          clearable
-                          required
-                          :rules="[
+                        <v-text-field v-model="editFormData.Start_Cuti" variant="underlined" density="compact"
+                          append-inner-icon="mdi-calendar" @click:appendInner="openStartCutiDatePicker"
+                          placeholder="DD/MM/YYYY" clearable required :rules="[
                             (value) => this.required(value),
                             (value) => this.isDateValid(value),
                             (value) => this.endDateValidation(value, this.revertDate(this.selectedKaryawan.Status.Start))
-                          ]"
-                        ></v-text-field>
-                        <VDatePicker
-                          v-model.string="editFormData.Start_Cuti"
-                          mode="date"
-                          @dayclick="closeStartCutiDatePicker"
-                          :masks="dateFormat"
-                          v-if="togglerHandler.isStartCutiDatePickerOpen"
-                        >
+                          ]"></v-text-field>
+                        <VDatePicker v-model.string="editFormData.Start_Cuti" mode="date"
+                          @dayclick="closeStartCutiDatePicker" :masks="dateFormat"
+                          v-if="togglerHandler.isStartCutiDatePickerOpen">
                         </VDatePicker>
                       </v-col>
-                      <v-col
-                        v-click-outside="closeEndCutiDatePicker"
-                        v-if="togglerHandler.isEndCuti"
-                      >
+                      <v-col v-click-outside="closeEndCutiDatePicker" v-if="togglerHandler.isEndCuti">
                         <v-list-item-title>Tanggal Balik Cuti</v-list-item-title>
                         <v-list-item-subtitle> <i> Return Date </i> </v-list-item-subtitle>
-                        <v-text-field
-                          v-model="editFormData.End_Cuti"
-                          variant="underlined"
-                          density="compact"
+                        <v-text-field v-model="editFormData.End_Cuti" variant="underlined" density="compact"
                           append-inner-icon="mdi-calendar"
-                          @click:appendInner="openEndCutiDatePicker(editFormData.Start_Cuti)"
-                          placeholder="DD/MM/YYYY"
-                          clearable
-                          required
-                          :rules="[
+                          @click:appendInner="openEndCutiDatePicker(editFormData.Start_Cuti)" placeholder="DD/MM/YYYY"
+                          clearable required :rules="[
                             (value) => this.required(value),
                             (value) => this.isDateValid(value),
                             (value) => this.endDateValidation(value, editFormData.Start_Cuti),
                             (value) => this.isDifferentValue(value)
-                          ]"
-                        ></v-text-field>
-                        <VDatePicker
-                          v-model.string="editFormData.End_Cuti"
-                          mode="date"
-                          @dayclick="closeEndCutiDatePicker"
-                          :masks="dateFormat"
-                          :min-date="getDateObj(convertDate(editFormData.Start_Cuti))"
-                          v-if="togglerHandler.isEndCutiDatePickerOpen"
-                        >
+                          ]"></v-text-field>
+                        <VDatePicker v-model.string="editFormData.End_Cuti" mode="date" @dayclick="closeEndCutiDatePicker"
+                          :masks="dateFormat" :min-date="getDateObj(convertDate(editFormData.Start_Cuti))"
+                          v-if="togglerHandler.isEndCutiDatePickerOpen">
                         </VDatePicker>
                       </v-col>
                       <!-- End Cuti Checkbox -->
                       <v-col align-self="start">
-                        <v-checkbox
-                          label="Balik Cuti"
-                          v-model="togglerHandler.isEndCuti"
-                        ></v-checkbox>
+                        <v-checkbox label="Balik Cuti" v-model="togglerHandler.isEndCuti"></v-checkbox>
                       </v-col>
                     </v-row>
 
@@ -580,33 +476,21 @@
                       <v-col v-if="togglerHandler.isDepart">
                         <v-list-item-title> Keberangkatan </v-list-item-title>
                         <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
-                        <v-text-field
-                          variant="underlined"
-                          placeholder="Kendari"
-                          v-model="editFormData.Depart"
-                          :rules="[(value) => this.required(value)]"
-                        >
+                        <v-text-field variant="underlined" placeholder="Kendari" v-model="editFormData.Depart"
+                          :rules="[(value) => this.required(value)]">
                         </v-text-field>
                       </v-col>
                       <v-col v-if="togglerHandler.isDepart">
                         <v-list-item-title> Kedatangan </v-list-item-title>
                         <v-list-item-subtitle> <i> Arrival </i> </v-list-item-subtitle>
-                        <v-text-field
-                          variant="underlined"
-                          placeholder="Jakarta"
-                          v-model="editFormData.Arrival"
-                          :rules="[
-                            (value) => this.required(value),
-                            (value) => this.isSameValidation(value, editFormData.Depart)
-                          ]"
-                        >
+                        <v-text-field variant="underlined" placeholder="Jakarta" v-model="editFormData.Arrival" :rules="[
+                          (value) => this.required(value),
+                          (value) => this.isSameValidation(value, editFormData.Depart)
+                        ]">
                         </v-text-field>
                       </v-col>
                       <v-col align-self="center">
-                        <v-checkbox
-                          label="Berangkat"
-                          v-model="togglerHandler.isDepart"
-                        ></v-checkbox>
+                        <v-checkbox label="Berangkat" v-model="togglerHandler.isDepart"></v-checkbox>
                       </v-col>
                     </v-row>
                   </v-col>
@@ -615,28 +499,15 @@
                       <v-col cols="5" v-click-outside="closeResignDatePicker">
                         <v-list-item-title>Tanggal Resign</v-list-item-title>
                         <v-list-item-subtitle> <i> Resign Date </i> </v-list-item-subtitle>
-                        <v-text-field
-                          v-model="editFormData.Resign_Date"
-                          variant="underlined"
-                          density="compact"
-                          append-inner-icon="mdi-calendar"
-                          @click:appendInner="openResignDatePicker"
-                          placeholder="DD/MM/YYYY"
-                          clearable
-                          required
-                          :rules="[
+                        <v-text-field v-model="editFormData.Resign_Date" variant="underlined" density="compact"
+                          append-inner-icon="mdi-calendar" @click:appendInner="openResignDatePicker"
+                          placeholder="DD/MM/YYYY" clearable required :rules="[
                             (value) => this.required(value),
                             (value) => this.isDateValid(value)
-                          ]"
-                        ></v-text-field>
-                        <VDatePicker
-                          v-model.string="editFormData.Resign_Date"
-                          mode="date"
-                          @dayclick="closeResignDatePicker"
-                          :masks="dateFormat"
-                          :min-date="new Date()"
-                          v-if="togglerHandler.isResignDatePickerOpen"
-                        >
+                          ]"></v-text-field>
+                        <VDatePicker v-model.string="editFormData.Resign_Date" mode="date"
+                          @dayclick="closeResignDatePicker" :masks="dateFormat" :min-date="new Date()"
+                          v-if="togglerHandler.isResignDatePickerOpen">
                         </VDatePicker>
                       </v-col>
                     </v-row>
@@ -668,45 +539,29 @@
             <v-container>
               <v-form ref="endCutiForm" lazy-validate>
                 <v-row>
-                  <v-radio-group
-                    v-model="setReturnData.Type"
-                    density="compact"
-                    style="margin-top: 10px; margin-left: 10px"
-                    inline
-                  >
+                  <v-radio-group v-model="setReturnData.Type" density="compact"
+                    style="margin-top: 10px; margin-left: 10px" inline>
                     <v-radio label="Balik Cuti" value="Return" style="margin-right: 1rem"></v-radio>
                     <v-radio label="Cut Off" value="Cut Off" style="margin-right: 1rem"></v-radio>
                   </v-radio-group>
                 </v-row>
                 <v-row dense>
                   <v-col v-click-outside="closeEndCutiDatePicker">
-                    <v-list-item-title> Tanggal {{ setReturnData.Type == 'Return' ? 'Balik Cuti' : 'Cut Off' }} </v-list-item-title>
-                    <v-list-item-subtitle> <i> {{setReturnData.Type == "Return" ? "Return Date" : "Cut Off Date"}} </i> </v-list-item-subtitle>
-                    <v-text-field
-                      v-model="setReturnData.Date"
-                      variant="underlined"
-                      density="compact"
-                      append-inner-icon="mdi-calendar"
-                      @click:appendInner="
+                    <v-list-item-title> Tanggal {{ setReturnData.Type == 'Return' ? 'Balik Cuti' : 'Cut Off' }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle> <i> {{ setReturnData.Type == "Return" ? "Return Date" : "Cut Off Date" }} </i>
+                    </v-list-item-subtitle>
+                    <v-text-field v-model="setReturnData.Date" variant="underlined" density="compact"
+                      append-inner-icon="mdi-calendar" @click:appendInner="
                         openEndCutiDatePicker(revertDate(selectedKaryawan.Status.Start))
-                      "
-                      placeholder="DD/MM/YYYY"
-                      clearable
-                      required
-                      :rules="[
-                        (value) => this.required(value),
-                        (value) => this.isDateValid(value),
-                        (value) => this.endDateValidation(value, revertDate(selectedKaryawan.Status.Start))
-                      ]"
-                    ></v-text-field>
-                    <VDatePicker
-                      v-model.string="setReturnData.Date"
-                      mode="date"
-                      @dayclick="closeEndCutiDatePicker"
-                      :masks="dateFormat"
-                      :min-date="getDateObj(selectedKaryawan.Status.Start)"
-                      v-if="togglerHandler.isEndCutiDatePickerOpen"
-                    >
+                        " placeholder="DD/MM/YYYY" clearable required :rules="[
+    (value) => this.required(value),
+    (value) => this.isDateValid(value),
+    (value) => this.endDateValidation(value, revertDate(selectedKaryawan.Status.Start))
+  ]"></v-text-field>
+                    <VDatePicker v-model.string="setReturnData.Date" mode="date" @dayclick="closeEndCutiDatePicker"
+                      :masks="dateFormat" :min-date="getDateObj(selectedKaryawan.Status.Start)"
+                      v-if="togglerHandler.isEndCutiDatePickerOpen">
                     </VDatePicker>
                   </v-col>
                 </v-row>
@@ -714,23 +569,15 @@
                   <v-col>
                     <v-list-item-title> Keberangkatan </v-list-item-title>
                     <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
-                    <v-text-field
-                      variant="underlined"
-                      placeholder="Jakarta"
-                      v-model="selectedKaryawan.Application.Arrival"
-                      readonly
-                    >
+                    <v-text-field variant="underlined" placeholder="Jakarta"
+                      v-model="selectedKaryawan.Application.Arrival" readonly>
                     </v-text-field>
                   </v-col>
                   <v-col>
                     <v-list-item-title> Kedatangan </v-list-item-title>
                     <v-list-item-subtitle> <i> Arrival </i> </v-list-item-subtitle>
-                    <v-text-field
-                      variant="underlined"
-                      placeholder="Kendari"
-                      v-model="selectedKaryawan.Application.Depart"
-                      readonly
-                    >
+                    <v-text-field variant="underlined" placeholder="Kendari" v-model="selectedKaryawan.Application.Depart"
+                      readonly>
                     </v-text-field>
                   </v-col>
                 </v-row>
@@ -746,16 +593,16 @@
           </v-card>
         </v-dialog>
 
-         <!-- Cut Off Dialog -->
-         <v-dialog v-model="togglerHandler.isCutOffDialogOpen" width="auto">
+        <!-- Cut Off Dialog -->
+        <v-dialog v-model="togglerHandler.isCutOffDialogOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
-                <v-toolbar-title class="text-h6"> Cut Off </v-toolbar-title>
-                <template v-slot:append>
-                  <v-btn @click="closeCutOffDialog" icon="Close">
-                    <span class="material-symbols-outlined"> close </span>
-                  </v-btn>
-                </template>
+              <v-toolbar-title class="text-h6"> Cut Off </v-toolbar-title>
+              <template v-slot:append>
+                <v-btn @click="closeCutOffDialog" icon="Close">
+                  <span class="material-symbols-outlined"> close </span>
+                </v-btn>
+              </template>
             </v-toolbar>
             <v-container>
               <v-form ref="cutoffForm" lazy-validate>
@@ -763,29 +610,16 @@
                   <v-col>
                     <v-list-item-title>Tanggal Cut Off</v-list-item-title>
                     <v-list-item-subtitle> <i>Date of Cut Off</i> </v-list-item-subtitle>
-                    <v-text-field
-                      v-model="cutOffFormData.Date"
-                      variant="underlined"
-                      density="compact"
-                      append-inner-icon="mdi-calendar"
-                      @click:appendInner="
+                    <v-text-field v-model="cutOffFormData.Date" variant="underlined" density="compact"
+                      append-inner-icon="mdi-calendar" @click:appendInner="
                         togglerHandler.isCutOffDatePickerOpen = true
-                      "
-                      placeholder="DD/MM/YYYY"
-                      clearable
-                      required
-                      :rules="[
-                        (value) => this.required(value),
-                        (value) => this.isDateValid(value),
-                      ]"
-                    ></v-text-field>
-                    <VDatePicker
-                      v-model.string="cutOffFormData.Date"
-                      mode="date"
-                      @dayclick="togglerHandler.isCutOffDatePickerOpen = false"
-                      :masks="dateFormat"
-                      v-if="togglerHandler.isCutOffDatePickerOpen"
-                    >
+                        " placeholder="DD/MM/YYYY" clearable required :rules="[
+    (value) => this.required(value),
+    (value) => this.isDateValid(value),
+  ]"></v-text-field>
+                    <VDatePicker v-model.string="cutOffFormData.Date" mode="date"
+                      @dayclick="togglerHandler.isCutOffDatePickerOpen = false" :masks="dateFormat"
+                      v-if="togglerHandler.isCutOffDatePickerOpen">
                     </VDatePicker>
                   </v-col>
                 </v-row>
@@ -805,10 +639,7 @@
         <v-dialog v-model="togglerHandler.isJoinDateFilterOpen" width="auto">
           <v-date-picker v-model.range="joinDateRange">
             <template #footer>
-              <v-btn
-                style="background-color: var(--secondary); width: auto; margin: 1rem"
-                @click="clearJoinDateRange"
-              >
+              <v-btn style="background-color: var(--secondary); width: auto; margin: 1rem" @click="clearJoinDateRange">
                 Clear
               </v-btn>
             </template>
@@ -819,23 +650,17 @@
         <v-dialog v-model="togglerHandler.isEndContractFilterOpen" width="auto">
           <v-date-picker v-model.range="endContractRange">
             <template #footer>
-              <v-btn
-                style="background-color: var(--secondary); width: auto; margin: 1rem"
-                @click="clearEndContractRange"
-              >
+              <v-btn style="background-color: var(--secondary); width: auto; margin: 1rem" @click="clearEndContractRange">
                 Clear
               </v-btn>
             </template>
           </v-date-picker>
         </v-dialog>
-        
+
       </div>
     </div>
-    
-    <SnackbarView
-      v-model:snackbarAttribute="snackbarAttribute"
-      @update:snackbarAttribute="updateSnackbarAttribute"
-    />
+
+    <SnackbarView v-model:snackbarAttribute="snackbarAttribute" @update:snackbarAttribute="updateSnackbarAttribute" />
   </div>
 </template>
 
@@ -868,13 +693,13 @@ export default {
       isStartCutiDatePickerOpen: ref(false),
       isEndCutiDatePickerOpen: ref(false),
       isResignDatePickerOpen: ref(false),
-      isReturnCutiDatePickerOpen : ref(false),
+      isReturnCutiDatePickerOpen: ref(false),
       isEndCuti: ref(false),
       isDepart: ref(false),
       isJoinDateFilterOpen: ref(false),
-      isEndContractFilterOpen : ref(false),
-      isCutOffDialogOpen : ref(false),
-      isCutOffDatePickerOpen : ref(false)
+      isEndContractFilterOpen: ref(false),
+      isCutOffDialogOpen: ref(false),
+      isCutOffDatePickerOpen: ref(false)
     },
 
     snackbarAttribute: {
@@ -888,17 +713,17 @@ export default {
     editFormData: ref({}),
     setReturnData: ref({}),
     extendFormData: ref({}),
-    cutOffFormData : ref({}),
+    cutOffFormData: ref({}),
 
+    // Filter Fields
     search: ref(''),
-
+    status: ref([]),
     joinDateRange: ref({
       start: ref(null),
       end: ref(null)
     }),
-
-    endContractRange : ref({
-      start:ref(null),
+    endContractRange: ref({
+      start: ref(null),
       end: ref(null)
     }),
 
@@ -943,6 +768,9 @@ export default {
       }
     ],
 
+    statusList: [
+      "Active", "Close Project", "Warning", "Resign", "Cut Off", "Cuti"
+    ]
   }),
   watch: {
     // Clear the form if "Application_Type" is changed
@@ -1014,7 +842,7 @@ export default {
         this.togglerHandler.isDepart = true
       }
 
-      if (this.editFormData.End_Cuti){
+      if (this.editFormData.End_Cuti) {
         this.togglerHandler.isEndCuti = true
       }
 
@@ -1071,15 +899,15 @@ export default {
       this.togglerHandler.isResignDatePickerOpen = false
     },
 
-    openReturnCutiDatePicker(){
+    openReturnCutiDatePicker() {
       this.togglerHandler.isReturnCutiDatePickerOpen = true
     },
 
-    closeReturnCutiDatePicker(){
+    closeReturnCutiDatePicker() {
       this.togglerHandler.isReturnCutiDatePickerOpen = false
     },
 
-    closeCutOffDialog(){
+    closeCutOffDialog() {
       this.cutOffFormData.Date = null;
       this.togglerHandler.isCutOffDialogOpen = false;
     },
@@ -1113,19 +941,19 @@ export default {
       if (valid) {
         // Set up API Payload
         const editApplyData = {
-          Application_Status : "Pending",
-          Application_Type : this.editFormData.Application_Type
+          Application_Status: "Pending",
+          Application_Type: this.editFormData.Application_Type
         }
 
-        if(editApplyData.Application_Type == "Kompensasi"){
+        if (editApplyData.Application_Type == "Kompensasi") {
           editApplyData.Start = this.isDateNullAndConvert(this.editFormData.Start_Contract)
           editApplyData.End = this.isDateNullAndConvert(this.editFormData.End_Contract)
-        }else if (editApplyData.Application_Type == "Cuti"){
-          editApplyData.Start =  this.isDateNullAndConvert(this.editFormData.Start_Cuti)
+        } else if (editApplyData.Application_Type == "Cuti") {
+          editApplyData.Start = this.isDateNullAndConvert(this.editFormData.Start_Cuti)
           editApplyData.End = this.togglerHandler.isEndCuti ? this.isDateNullAndConvert(this.editFormData.End_Cuti) : null
           editApplyData.Depart = this.editFormData.Depart
           editApplyData.Arrival = this.editFormData.Arrival
-        }else if (editApplyData.Application_Type == "Resign"){
+        } else if (editApplyData.Application_Type == "Resign") {
           editApplyData.Start = this.isDateNullAndConvert(this.editFormData.Resign_Date)
         }
 
@@ -1159,65 +987,65 @@ export default {
 
       if (valid) {
         this.setReturnData.Date = this.convertDate(this.setReturnData.Date)
-        if(this.setReturnData.Type == "Return"){
+        if (this.setReturnData.Type == "Return") {
           await axios.post(`${this.karyawanURL}/status/setendcuti/${this.selectedKaryawan.ID}`,
-              this.setReturnData
+            this.setReturnData
           )
-          .then((response) => {
-            this.closeReturnDateDialog()
-            this.selectedKaryawan.Status.End = response.data.end
-            this.openSnackbar(true, response.data.message)
-          })
-          .catch((error) => {
-            this.openSnackbar(false, error.data.message)
-          })
+            .then((response) => {
+              this.closeReturnDateDialog()
+              this.selectedKaryawan.Status.End = response.data.end
+              this.openSnackbar(true, response.data.message)
+            })
+            .catch((error) => {
+              this.openSnackbar(false, error.data.message)
+            })
         }
 
-        if(this.setReturnData.Type == "Cut Off"){
+        if (this.setReturnData.Type == "Cut Off") {
           await axios.post(`${this.karyawanURL}/status/cutoff/${this.selectedKaryawan.ID}`,
-          this.setReturnData
-          ).then((response)=>{
+            this.setReturnData
+          ).then((response) => {
             console.log(response)
             this.closeReturnDateDialog()
             this.selectedKaryawan.Status.Status = "Cut Off"
             this.selectedKaryawan.Status.Start = response.data.start
             this.selectedKaryawan.Status.End = null
             this.selectedKaryawan.Logs.push({
-              CreatedAt : this.selectedKaryawan.Status.Start,
-              Message : `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
-              Type : "Cut Off",
+              CreatedAt: this.selectedKaryawan.Status.Start,
+              Message: `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
+              Type: "Cut Off",
             })
             this.openSnackbar(true, response.data.message)
-          }).catch((error)=>{
+          }).catch((error) => {
             this.openSnackbar(false, error.data.message)
           })
         }
       }
     },
 
-    async submitCutOffForm(){
+    async submitCutOffForm() {
       const { valid } = await this.$refs.cutoffForm.validate()
 
-      if(valid){
+      if (valid) {
         this.cutOffFormData.Date = this.convertDate(this.cutOffFormData.Date)
         // Cut Off
         await axios.post(`${this.karyawanURL}/status/cutoff/${this.selectedKaryawan.ID}`,
           this.cutOffFormData
-          ).then((response)=>{
-            this.closeCutOffDialog()
-            this.selectedKaryawan.Status.Status = "Cut Off"
-            this.selectedKaryawan.Status.Start = response.data.start
-            this.selectedKaryawan.Status.End = null
-            this.selectedKaryawan.Logs.push({
-              CreatedAt : this.selectedKaryawan.Status.Start,
-              Message : `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
-              Type : "Cut Off",
-            })
-            this.openSnackbar(true, response.data.message)
-          }).catch((error) =>{
-            this.openSnackbar(false, error.data.message)
+        ).then((response) => {
+          this.closeCutOffDialog()
+          this.selectedKaryawan.Status.Status = "Cut Off"
+          this.selectedKaryawan.Status.Start = response.data.start
+          this.selectedKaryawan.Status.End = null
+          this.selectedKaryawan.Logs.push({
+            CreatedAt: this.selectedKaryawan.Status.Start,
+            Message: `Cut Off Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
+            Type: "Cut Off",
           })
-      } 
+          this.openSnackbar(true, response.data.message)
+        }).catch((error) => {
+          this.openSnackbar(false, error.data.message)
+        })
+      }
     },
 
     async approveForm() {
@@ -1226,10 +1054,10 @@ export default {
         .then((response) => {
           if (response) {
 
-            
+
             this.selectedKaryawan.Application.Application_Status = response.data.status ? response.data.status : null
 
-      
+
             if (response.data.currentStatus) {
               this.selectedKaryawan.Application = {}
               this.selectedKaryawan.Status.Status = response.data.currentStatus.Status
@@ -1240,8 +1068,8 @@ export default {
             // update log immediately after application approved
             const formattedLogUpdates = response.data.logUpdates.map(update => ({
               ...update,
-              Start : update.Start,
-              End : update.End ? update.End : null
+              Start: update.Start,
+              End: update.End ? update.End : null
             }));
 
             this.selectedKaryawan.Logs = this.selectedKaryawan.Logs.concat(formattedLogUpdates)
@@ -1263,9 +1091,9 @@ export default {
           if (response) {
             this.selectedKaryawan.Application.Application_Status = response.data.status
             this.selectedKaryawan.Logs.push({
-                CreatedAt: moment().format('YYYY-MM-DD'),
-                Message: "Pengajuan ditolak",
-                Type: "Reject"
+              CreatedAt: moment().format('YYYY-MM-DD'),
+              Message: "Pengajuan ditolak",
+              Type: "Reject"
             })
             this.openSnackbar(false, response.data.message)
           }
@@ -1276,29 +1104,29 @@ export default {
         })
     },
 
-    async submitExtendForm(){
-      const {valid} = await this.$refs.extendForm.validate()
-      if(valid){
+    async submitExtendForm() {
+      const { valid } = await this.$refs.extendForm.validate()
+      if (valid) {
         console.log("Extend Set")
       }
     },
 
-    async downloadContract(){
+    async downloadContract() {
       await axios.get(`${this.karyawanURL}/contract/generate/${this.selectedKaryawan.ID}`, {
-        responseType : 'blob'
+        responseType: 'blob'
       })
-      .then((response)=>{
-       
-        // Create a Blob object from the response data
-        const blob = new Blob([response.data], { type: response.headers['content-type'] });
-        const fileName = `PKWT - ${this.selectedKaryawan.Name.toUpperCase()}.docx`
-        saveAs(blob, fileName)
+        .then((response) => {
 
-      }).catch((error)=>{
-        console.log(error)
-      })
+          // Create a Blob object from the response data
+          const blob = new Blob([response.data], { type: response.headers['content-type'] });
+          const fileName = `PKWT - ${this.selectedKaryawan.Name.toUpperCase()}.docx`
+          saveAs(blob, fileName)
+
+        }).catch((error) => {
+          console.log(error)
+        })
     }
-    
+
   },
   created() {
     this.getAllEmployees()
@@ -1306,32 +1134,40 @@ export default {
   computed: {
     // Filter the Employees
     filteredEmployees() {
-      const start = this.joinDateRange.start
-      const end = this.joinDateRange.end
+      const start = this.joinDateRange.start;
+      const end = this.joinDateRange.end;
+      const endContractStart = this.endContractRange.start;
+      const endContractEnd = this.endContractRange.end;
 
-      const endContractStart = this.endContractRange.start
-      const endContractEnd = this.endContractRange.end
+      let filteredEmployees = this.employees.slice(); // Make a copy of the original array
 
-      // Filter Join Date
-      if (start && end) {
-        return this.employees.filter((employee) => {
-          const joinDate = this.getDateObj(employee.Join_Date)
-          return joinDate >= start && joinDate <= end
-        })
+      // Filter by status
+      if (this.status.length > 0) {
+        filteredEmployees = filteredEmployees.filter((employee) =>
+          this.status.includes(employee.Status.Status)
+        );
       }
 
-      // Filter End Contract
+      // Filter by Join Date
+      if (start && end) {
+        filteredEmployees = filteredEmployees.filter((employee) => {
+          const joinDate = this.getDateObj(employee.Join_Date);
+          return joinDate >= start && joinDate <= end;
+        });
+      }
+
+      // Filter by End Contract
       if (endContractStart && endContractEnd) {
-        return this.employees.filter((employee) => {
+        filteredEmployees = filteredEmployees.filter((employee) => {
           if (employee.Status.End === null) {
             return false; // Skip filtering for this employee
           }
-
-          const endContract = this.getDateObj(employee.Status.End)
-          return endContract >= endContractStart && endContract <= endContractEnd
-        })
+          const endContract = this.getDateObj(employee.Status.End);
+          return endContract >= endContractStart && endContract <= endContractEnd;
+        });
       }
-      return this.employees
+
+      return filteredEmployees;
     },
 
     // Set Up return date (Cuti)
@@ -1350,7 +1186,7 @@ export default {
       }
       return null
     },
-    
+
     getEndContractRange() {
       if (this.endContractRange.start && this.endContractRange.end) {
         return `${moment(this.endContractRange.start).format('DD/MM/YYYY')} - ${moment(
@@ -1361,7 +1197,7 @@ export default {
     },
 
     getLastContract() {
-      const lastContract = this.selectedKaryawan.Logs.find((item)=>
+      const lastContract = this.selectedKaryawan.Logs.find((item) =>
         item.Type == "Contract"
       )
       return lastContract

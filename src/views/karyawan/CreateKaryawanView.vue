@@ -344,6 +344,9 @@ export default {
         position : "Mekanik Junior"
       },
       {
+        position : "Mekanik LV"
+      },
+      {
         position : "Tyreman"
       },
       {
@@ -354,7 +357,10 @@ export default {
       },
       {
         position : "Cleaning Service"
-      }
+      },
+      {
+        position : "Pengurus"
+      },
     ],
 
     formData: {

@@ -4,7 +4,9 @@
       <div class="nav-toogle">
         <v-btn density="comfortable" icon="mdi-format-list-bulleted" variant="text" @click="expandSidebar"></v-btn>
       </div>
-      <ol class="nav-path-lists">
+
+      <!-- Navigation Path -->
+      <!-- <ol class="nav-path-lists">
         <li class="ml-0">
           <div class="flex items-center">
             <span class="material-symbols-outlined text-base"> home </span>
@@ -26,17 +28,21 @@
             <span class="nav-path-current">Flowbite</span>
           </div>
         </li>
-      </ol>
+      </ol> -->
+    
     </div>
 
     <div class="nav-menu">
-      <div class="nav-menu-item search">
+      <!-- Search Bar -->
+      <!-- <div class="nav-menu-item search">
         <input type="text" placeholder="Search" />
         <button>
           <span class="material-symbols-outlined"> search </span>
         </button>
-      </div>
-      <div class="nav-menu-item language">
+      </div> -->
+
+      <!-- Language Options -->
+      <!-- <div class="nav-menu-item language">
         <Listbox v-model="selectedLang">
           <div class="relative w-100">
             <ListboxButton class="lang-list-button">
@@ -76,7 +82,7 @@
             </transition>
           </div>
         </Listbox>
-      </div>
+      </div> -->
 
       <div
         class="nav-menu-item notification"
