@@ -12,7 +12,7 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-import { VDataTable } from 'vuetify/lib/labs/components.mjs'
+// import { VDataTable } from 'vuetify/lib/labs/components.mjs'
 
 import VCalendar from 'v-calendar';
 import 'v-calendar/style.css';
@@ -20,7 +20,7 @@ import 'v-calendar/style.css';
 const vuetify = createVuetify({
   components : {
     ...components,
-    VDataTable,
+    // VDataTable,
   },
   directives,
 })

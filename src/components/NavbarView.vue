@@ -113,8 +113,8 @@
             </v-col>
           </v-row>
           <v-divider :thickness="3" color="info"></v-divider>
-          <v-virtual-scroll height="350" width="350" :items="notifItems">
-            <template v-slot:default="{ item }">
+          <v-infinite-scroll height="350" width="350" :items="notifItems" @load="load">
+            <template  v-for="(item, index) in notifItems" :key="item">
               <v-list-item
                 :title="`${item.Title}`"
                 :subtitle="`${item.Description}`"
@@ -125,10 +125,14 @@
                   <p>{{ moment(item.createdAt).format('DD/MM/YYYY') }}</p>
                   <span v-show="!item.IsRead" class="status"></span>
                 </template>
+
               </v-list-item>
               <v-divider :thickness="5"> </v-divider>
             </template>
-          </v-virtual-scroll>
+            <template v-slot:empty>
+              <!-- Being left empty for purpose -->
+            </template>
+          </v-infinite-scroll>
         </v-card>
       </div>
     </div>
@@ -365,6 +369,8 @@ export default {
   mixins : [karyawanMixin],
   data: () => ({
     notifExpand : ref(false),
+    notifPage : 0,
+    notifEmpty : ref(false),
     notifItems: [
       // {
       //   title: 'Title',
@@ -374,14 +380,34 @@ export default {
     
   }),
   methods: {
+    load({ done }) {
+      if(!this.notifEmpty){
+        setTimeout(()=>{
+          this.getNotification()
+          done('ok')
+        }, 1000)
+      }else{
+        setTimeout(()=>{
+          done('empty')
+        }, 1000)
+      }
+    },
+    
     getNotification(){
-      axios.get(`${this.karyawanURL}/notif/`)
+      axios.get(`${this.karyawanURL}/notif/${this.notifPage}`)
       .then((response)=>{
-        this.notifItems = response.data
+        const newData = response.data
+        if(newData.length === 0){
+          this.notifEmpty = true
+        }else{
+          this.notifItems.push(...newData)
+          this.notifPage++
+        }
       }).catch((error)=>{
-        console.log(error)
+        console.error(error)
       })
     },
+    
 
     expandSidebar(){
       this.$store.commit('expandSidebar')

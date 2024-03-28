@@ -332,6 +332,9 @@ export default {
         position : "Admin Plant"
       },
       {
+        position : "Admin"
+      },
+      {
         position : "Bobok"
       },
       {
@@ -342,6 +345,9 @@ export default {
       },
       {
         position : "Mekanik Junior"
+      },
+      {
+        position : "Mekanik Leader"
       },
       {
         position : "Mekanik LV"

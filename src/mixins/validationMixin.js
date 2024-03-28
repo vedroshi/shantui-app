@@ -16,15 +16,23 @@ export const validationMixin = {
         },
 
         endDateValidation(value, start_date){
-            return this.getDateObj(this.convertDate(value)) >= this.getDateObj(this.convertDate(start_date)) || "Invalid End Cuti"
+            try{
+                return this.getDateObj(this.convertDate(value)) > this.getDateObj(this.convertDate(start_date))
+            }catch(error){
+                return error.message
+            }
         },
 
         numberCheckValidation(value){
-            return /^\d+$/.test(value) || "Only Consist of Number"
+            return /^\d+$/.test(value) || "Invalid Input"
         },
 
         isDateValid(value){
             return /^\d{2}\/\d{2}\/\d{4}$/.test(value) || "Date must be DD/MM/YYYY"
+        },
+
+        isValueDate(value){
+            return !isNaN(Date.parse(this.convertDate(value))) || "Invalid Date"
         },
 
         isDifferentValue(value, oldValue){

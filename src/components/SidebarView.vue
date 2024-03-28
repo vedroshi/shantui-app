@@ -23,6 +23,10 @@
           <span class="material-symbols-outlined"> event </span>
           <span class="menu-label">Calendar</span>
         </router-link>
+        <router-link class="menu-button" to="/rentleasing">
+          <span class="material-symbols-outlined"> event_upcoming </span>
+          <span class="menu-label">Rental & Leasing</span>
+        </router-link>
       </div>
 
       <div class="main-menu-items">

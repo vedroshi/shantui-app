@@ -117,7 +117,7 @@ export default {
       }else if (tags == "Expired"){
         return "red"
       }else if (tags == "Cuti"){
-        return "yellow"
+        return "orange"
       }else if (tags == "Cut Off"){
         return "brown"
       }else if (tags == "Resign"){

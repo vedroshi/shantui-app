@@ -5,6 +5,7 @@ import HomeView from '../views/HomeView.vue';
 import CalendarView from '../views/CalendarView.vue';
 import KaryawanView from '../views/KaryawanView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
+import RentLeasingView from '../views/RentLeasingView.vue';
 
 import KaryawanListView from '../views/karyawan/KaryawanListView.vue';
 import CreateKaryawanView from '../views/karyawan/CreateKaryawanView.vue';
@@ -23,6 +24,11 @@ const router = createRouter({
       name : 'Calendar',
       path : '/calendar',
       component : CalendarView
+    },
+    {
+      name : 'RentLeasing',
+      path : '/rentleasing',
+      component : RentLeasingView
     },
     {
       name : 'Karyawan',

@@ -6,7 +6,7 @@
         <v-col cols="3">
           <v-text-field prepend-inner clearable hide-details variant="underlined" density="compact" clear-icon="$cancel"
             class="shrink" v-model="search">
-            <span class="material-symbols-outlined mr-3 mt-1"> search </span>
+            <span class="material-symbols-outlined mr-3"> search </span>
           </v-text-field>
         </v-col>
 
@@ -42,7 +42,7 @@
         </v-col>
 
         <!-- Add New Employee -->
-        <v-col cols="auto" align-self="center">
+        <v-col cols="auto" align-self="start">
           <v-btn rounded style="background-color: var(--primary)" @click="this.$router.push('karyawan/create')">
             <span class="material-symbols-outlined"> add </span>
           </v-btn>
@@ -555,10 +555,10 @@
                       append-inner-icon="mdi-calendar" @click:appendInner="
                         openEndCutiDatePicker(revertDate(selectedKaryawan.Status.Start))
                         " placeholder="DD/MM/YYYY" clearable required :rules="[
-    (value) => this.required(value),
-    (value) => this.isDateValid(value),
-    (value) => this.endDateValidation(value, revertDate(selectedKaryawan.Status.Start))
-  ]"></v-text-field>
+                      (value) => this.required(value),
+                      (value) => this.isDateValid(value),
+                      (value) => this.endDateValidation(value, revertDate(selectedKaryawan.Status.Start))
+                    ]"></v-text-field>
                     <VDatePicker v-model.string="setReturnData.Date" mode="date" @dayclick="closeEndCutiDatePicker"
                       :masks="dateFormat" :min-date="getDateObj(selectedKaryawan.Status.Start)"
                       v-if="togglerHandler.isEndCutiDatePickerOpen">

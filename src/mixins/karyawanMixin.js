@@ -8,7 +8,6 @@ export const karyawanMixin = {
             karyawanURL : this.$store.state.karyawanURL,
             selectedKaryawan : this.$store.state.selectedKaryawan,
            
-           
             dateFormat: ref({
                 modelValue: 'DD/MM/YYYY'
               })
@@ -38,7 +37,7 @@ export const karyawanMixin = {
             if (date && month && year) {
               return new Date(year, month - 1, date);
             } else {
-              throw new Error('Invalid date format');
+              throw new Error('Invalid Date');
             }
         },
 
