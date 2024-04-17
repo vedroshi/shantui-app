@@ -317,6 +317,9 @@ export default {
         position : "Jubir"
       },
       {
+        position : "Assembly"
+      },
+      {
         position : "Helper"
       },
       {

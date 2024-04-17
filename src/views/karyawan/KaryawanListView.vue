@@ -92,6 +92,7 @@
             </v-btn>
             <v-toolbar-title>{{ selectedKaryawan.Name }}</v-toolbar-title>
           </v-toolbar>
+
           <v-sheet class="karyawan-details">
             <v-row style="margin: 1rem">
               <!-- KTP Image -->
@@ -100,6 +101,7 @@
                   class="height-100 width-100">
                 </v-img>
               </v-card>
+
               <!-- Header Profile -->
               <v-col align-self="start">
                 <v-row>
@@ -137,12 +139,22 @@
                     Log Karyawan
                   </v-btn>
                 </v-row>
-                <v-row justify="end" style="margin-bottom: 1rem" v-if="selectedKaryawan.Status.Status == 'Active'">
+
+                <v-row justify="end" style="margin-bottom: 1rem" 
+                  v-if="
+                  // contract is still active
+                    selectedKaryawan.Status.Status == 'Active' || 
+                    // employee applied for compensation and accepted
+                    (selectedKaryawan.Application.Application_Type == 'Kompensasi' && selectedKaryawan.Application.Application_Status == 'Accepted') || 
+                    // renew contract after return to site
+                    (selectedKaryawan.Status.Status == 'Cuti' && selectedKaryawan.Status.End && getDateObj(getLastContract.End) < new Date())
+                ">
                   <v-btn @click="downloadContract">
                     <span class="material-symbols-outlined mr-1"> download </span>
                     Download PKWT
                   </v-btn>
                 </v-row>
+
               </v-col>
             </v-row>
             <div class="karyawan-profile">
@@ -536,20 +548,26 @@
                 </v-btn>
               </template>
             </v-toolbar>
+
             <v-container>
               <v-form ref="endCutiForm" lazy-validate>
+                <!-- Select Type -->
                 <v-row>
                   <v-radio-group v-model="setReturnData.Type" density="compact"
                     style="margin-top: 10px; margin-left: 10px" inline>
                     <v-radio label="Balik Cuti" value="Return" style="margin-right: 1rem"></v-radio>
                     <v-radio label="Cut Off" value="Cut Off" style="margin-right: 1rem"></v-radio>
+                    <v-radio label="Resign" value="Resign" style="margin-right: 1rem"></v-radio>
                   </v-radio-group>
                 </v-row>
                 <v-row dense>
                   <v-col v-click-outside="closeEndCutiDatePicker">
-                    <v-list-item-title> Tanggal {{ setReturnData.Type == 'Return' ? 'Balik Cuti' : 'Cut Off' }}
+                    <v-list-item-title> 
+                      Tanggal {{ 
+                        setReturnData.Type == 'Return' ? 'Balik Cuti' : setReturnData.Type == 'Resign' ? 'Resign' : 'Cut Off' }}
                     </v-list-item-title>
-                    <v-list-item-subtitle> <i> {{ setReturnData.Type == "Return" ? "Return Date" : "Cut Off Date" }} </i>
+                    <v-list-item-subtitle> 
+                      <i> {{ setReturnData.Type == "Return" ? "Return Date" : setReturnData.Type == 'Resign' ? 'Resign Date' : 'Cut Off Date'}} </i>
                     </v-list-item-subtitle>
                     <v-text-field v-model="setReturnData.Date" variant="underlined" density="compact"
                       append-inner-icon="mdi-calendar" @click:appendInner="
@@ -565,7 +583,7 @@
                     </VDatePicker>
                   </v-col>
                 </v-row>
-                <v-row dense v-if="selectedKaryawan.Application.Depart">
+                <v-row dense v-if="selectedKaryawan.Application.Depart && setReturnData.Type == 'Return'">
                   <v-col>
                     <v-list-item-title> Keberangkatan </v-list-item-title>
                     <v-list-item-subtitle> <i> Departure </i> </v-list-item-subtitle>
@@ -614,9 +632,9 @@
                       append-inner-icon="mdi-calendar" @click:appendInner="
                         togglerHandler.isCutOffDatePickerOpen = true
                         " placeholder="DD/MM/YYYY" clearable required :rules="[
-    (value) => this.required(value),
-    (value) => this.isDateValid(value),
-  ]"></v-text-field>
+                          (value) => this.required(value),
+                          (value) => this.isDateValid(value),
+                        ]"></v-text-field>
                     <VDatePicker v-model.string="cutOffFormData.Date" mode="date"
                       @dayclick="togglerHandler.isCutOffDatePickerOpen = false" :masks="dateFormat"
                       v-if="togglerHandler.isCutOffDatePickerOpen">
@@ -987,6 +1005,8 @@ export default {
 
       if (valid) {
         this.setReturnData.Date = this.convertDate(this.setReturnData.Date)
+        
+        
         if (this.setReturnData.Type == "Return") {
           await axios.post(`${this.karyawanURL}/status/setendcuti/${this.selectedKaryawan.ID}`,
             this.setReturnData
@@ -1001,11 +1021,26 @@ export default {
             })
         }
 
-        if (this.setReturnData.Type == "Cut Off") {
+        if(this.setReturnData.Type == "Resign"){
+          await axios.post(`${this.karyawanURL}/status/resign/${this.selectedKaryawan.ID}`, this.setReturnData
+          ).then((response)=>{
+            this.closeReturnDateDialog()
+            this.selectedKaryawan.Status.Status = "Resign"
+            this.selectedKaryawan.Status.Start = response.data.start
+            this.selectedKaryawan.Status.End = null
+            this.selectedKaryawan.Logs.push({
+              CreatedAt: this.selectedKaryawan.Status.Start,
+              Message: `Resign Tanggal ${this.formatDate(this.selectedKaryawan.Status.Start)}`,
+              Type: "Resign",
+            })
+            this.openSnackbar(true, response.data.message)
+          })
+        }
+
+        if(this.setReturnData.Type == "Cut Off") {
           await axios.post(`${this.karyawanURL}/status/cutoff/${this.selectedKaryawan.ID}`,
             this.setReturnData
           ).then((response) => {
-            console.log(response)
             this.closeReturnDateDialog()
             this.selectedKaryawan.Status.Status = "Cut Off"
             this.selectedKaryawan.Status.Start = response.data.start
@@ -1089,12 +1124,24 @@ export default {
         .patch(`${this.karyawanURL}/apply/reject/${this.selectedKaryawan.ID}`)
         .then((response) => {
           if (response) {
+            // Change Status
             this.selectedKaryawan.Application.Application_Status = response.data.status
+            
+            // if there is status changes
+            if (response.data.currentStatus) {
+              this.selectedKaryawan.Application = {}
+              this.selectedKaryawan.Status.Status = response.data.currentStatus.Status
+              this.selectedKaryawan.Status.Start = response.data.currentStatus.Start
+              this.selectedKaryawan.Status.End = response.data.currentStatus.End
+            }
+
+            // Update karyawan log
             this.selectedKaryawan.Logs.push({
               CreatedAt: moment().format('YYYY-MM-DD'),
               Message: "Pengajuan ditolak",
               Type: "Reject"
             })
+
             this.openSnackbar(false, response.data.message)
           }
         })
@@ -1126,6 +1173,8 @@ export default {
           console.log(error)
         })
     }
+
+  
 
   },
   created() {
