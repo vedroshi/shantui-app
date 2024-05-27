@@ -1,16 +1,14 @@
 import moment from 'moment';
 import {ref} from 'vue';
 import {clone} from 'lodash';
+import {dateConversionMixin} from './dateConversionMixin';
 
 export const karyawanMixin = {
+    mixins : [dateConversionMixin],
     data(){
         return{
             karyawanURL : this.$store.state.karyawanURL,
             selectedKaryawan : this.$store.state.selectedKaryawan,
-           
-            dateFormat: ref({
-                modelValue: 'DD/MM/YYYY'
-              })
         }
     },
     methods : {
@@ -30,44 +28,6 @@ export const karyawanMixin = {
             return clone(this.selectedKaryawan.Application)
         }
             return null
-        },
-        // Set the date string to date
-        getDateObj(dateString){
-            const [year, month, date] = dateString.split('-');
-            if (date && month && year) {
-              return new Date(year, month - 1, date);
-            } else {
-              throw new Error('Invalid Date');
-            }
-        },
-
-        // Format DD/MM/YYYY to YYYY-MM-DD
-        convertDate(date){
-            const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD')
-            return formattedDate
-        },
-
-        revertDate(date){
-            const revertDate = moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY')
-            return revertDate
-        },
-
-        // Format YYYY-MM-DD to DD MMMM YYYY
-        formatDate(date){
-            const formattedDate = moment(date, 'YYYY-MM-DD').format('DD MMMM YYYY')
-            return formattedDate
-        },
-        
-        // Check if Date is Null and Convert it to 'YYYY-MM-DD'
-        isDateNullAndConvert(val){
-            const value = val == null ? null : this.convertDate(val)
-            return value
-        },
-
-        // Check if Date is Null and Convert it to 'DD/MM/YYYY'
-        isDateNullAndRevert(val){
-            const value = val == null ? null : this.revertDate(val)
-            return value
         },
 
         resetApplicationForm (formData, toggler, newType, oldType) {
@@ -105,7 +65,7 @@ export const karyawanMixin = {
         // Get the Init Start Contract Date (Kompensasi)
         setStartContractDate(){
             if(this.selectedKaryawan){
-                const endDate = this.getDateObj(this.selectedKaryawan.Status.End);
+                const endDate = this.getDateObject(this.selectedKaryawan.Status.End);
                 endDate.setDate(endDate.getDate() + 1);
                 return moment(endDate).format('DD/MM/YYYY');
             }
@@ -116,7 +76,7 @@ export const karyawanMixin = {
         setEndContractDate(){
             if(this.selectedKaryawan){
                 const startDate = moment(this.setStartContractDate, 'DD/MM/YYYY').format('yyyy-MM-DD')
-                const endDate = this.getDateObj(startDate);
+                const endDate = this.getDateObject(startDate);
                 endDate.setMonth(endDate.getMonth() + 6);
                 return moment(endDate).format('DD/MM/YYYY');
             }

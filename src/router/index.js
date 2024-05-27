@@ -10,6 +10,7 @@ import RentLeasingView from '../views/RentLeasingView.vue';
 import KaryawanListView from '../views/karyawan/KaryawanListView.vue';
 import CreateKaryawanView from '../views/karyawan/CreateKaryawanView.vue';
 import PengajuanView from '../views/karyawan/PengajuanView.vue';
+import ContractListView from '../views/karyawan/ContractListView.vue';
 
 
 const router = createRouter({
@@ -40,6 +41,11 @@ const router = createRouter({
           path : '',
           component : KaryawanListView,
           alias : ['/list', 'list']
+        },
+        {
+          name: 'ContractList',
+          path: 'contracts',
+          component : ContractListView
         },
         {
           name : 'AddKaryawan',

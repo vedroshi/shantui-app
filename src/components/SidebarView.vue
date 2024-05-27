@@ -42,6 +42,10 @@
                 <span class="material-symbols-outlined"> badge </span>
                 <button class="menu-label">Employee List</button>
               </router-link>
+              <router-link class="menu-button" to="/karyawan/contracts">
+                <span class="material-symbols-outlined"> contract </span>
+                <button class="menu-label">Contract List</button>
+              </router-link>
             </div>
           </Transition>
         </div>

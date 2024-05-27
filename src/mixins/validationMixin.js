@@ -1,7 +1,7 @@
-import { karyawanMixin } from "./karyawanMixin"
+import { dateConversionMixin } from "./dateConversionMixin"
 
 export const validationMixin = {
-    mixins : [karyawanMixin],
+    mixins : [dateConversionMixin],
     methods : {
         required(value){
             return !!value || "*Required"
@@ -15,11 +15,11 @@ export const validationMixin = {
             return value.length == value_len || `Length must be equal to ${value_len}`
         },
 
-        endDateValidation(value, start_date){
-            try{
-                return this.getDateObj(this.convertDate(value)) > this.getDateObj(this.convertDate(start_date))
-            }catch(error){
-                return error.message
+        endDateValidation(value, start_date, message){
+            if( this.getDateObject(this.convertDDMMYYYYToYYYYMMDD(value)) > this.getDateObject(this.convertDDMMYYYYToYYYYMMDD(start_date))){
+                return true
+            }else{
+                return message
             }
         },
 
@@ -32,12 +32,11 @@ export const validationMixin = {
         },
 
         isValueDate(value){
-            return !isNaN(Date.parse(this.convertDate(value))) || "Invalid Date"
+            return !isNaN(Date.parse(this.convertDDMMYYYYToYYYYMMDD(value))) || "Invalid Date"
         },
 
         isDifferentValue(value, oldValue){
             return value !== oldValue || "Input Different Value"
-        }
-
+        },
     },
 }

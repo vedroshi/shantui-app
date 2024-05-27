@@ -1,12 +1,14 @@
 import {createStore} from 'vuex';
 
 const KaryawanAPIEndpoint = import.meta.env.VITE_APP_KARYAWAN_ENDPOINT
+const RentLeasingAPIEndpoint = import.meta.env.VITE_APP_RENTLEASING_ENDPOINT
 
 const store = createStore({
     state: {
       // Your application's global state goes here
       selectedKaryawan : {},
       karyawanURL : KaryawanAPIEndpoint,
+      rentLeasingURL : RentLeasingAPIEndpoint,
       sidebarExpand : false
     },
     mutations: {
