@@ -2,6 +2,7 @@ import moment from 'moment';
 import {ref} from 'vue';
 import {clone} from 'lodash';
 import {dateConversionMixin} from './dateConversionMixin';
+import axios from 'axios';
 
 export const karyawanMixin = {
     mixins : [dateConversionMixin],
@@ -58,7 +59,34 @@ export const karyawanMixin = {
 
         resetCutOffForm(formData){
             formData.Date = null;
-        }
+        },
+
+        async showKaryawanPosition(list) {
+            await axios.get(`${this.karyawanURL}/position/`)
+              .then((response) => {
+                if(response.status == 200){   
+                  // Change PositionList Format
+                  response.data.forEach((item) => {
+                    let existingPosition = list.find((position) => position.Name === item.Name);
+                    
+                    if (!existingPosition) {
+                      let newPosition = {
+                        Name: item.Name,
+                        Tonnages: item.Tonnage !== null ? [item.Tonnage] : null
+                      };
+                      list.push(newPosition);
+                    } else if (item.Tonnage !== null) {
+                      existingPosition.Tonnages.push(item.Tonnage);
+                    }
+
+                    return list
+                  });
+
+                }
+              }).catch((error) => {
+                console.error(error)
+              })
+          }
     },
     computed : {
        

@@ -94,6 +94,7 @@
           </v-toolbar>
 
           <v-sheet class="karyawan-details">
+
             <v-row style="margin: 1rem">
               <!-- KTP Image -->
               <v-card width="300" height="150">
@@ -116,23 +117,69 @@
                     <v-list-item-title>{{ selectedKaryawan.Name }}</v-list-item-title>
                   </v-list-item>
                 </v-row>
-                <v-row>
-                  <v-list-item>
-                    <v-list-item-subtitle>Posisi</v-list-item-subtitle>
-                    <v-list-item-title>{{ selectedKaryawan.Position.Name }}</v-list-item-title>
-                  </v-list-item>
-                  <div v-if="selectedKaryawan.Position.Tonnage">
-                    <v-list-item>
-                      <v-list-item-subtitle>Tonase</v-list-item-subtitle>
-                      <v-list-item-title>{{ selectedKaryawan.Position.Name == "Operator Excavator" ? 'PC' : '' }}
-                        {{ selectedKaryawan.Position.Tonnage }}
-                        {{ selectedKaryawan.Position.Name == "Operator Excavator" ? '' : 'Ton' }}
-                      </v-list-item-title>
-                    </v-list-item>
-                  </div>
+                <v-row align="center">
+                  <v-row dense v-if="togglerHandler.editPosition == false">
+                    <v-col cols="auto">
+                      <v-list-item>
+                        <v-list-item-subtitle>Posisi</v-list-item-subtitle>
+                        <v-list-item-title>{{ selectedKaryawan.Position.Name }}</v-list-item-title>
+                      </v-list-item>
+                    </v-col>
+                    <v-col cols="auto">
+                      <div v-if="selectedKaryawan.Position.Tonnage">
+                        <v-list-item>
+                          <v-list-item-subtitle>Tonase</v-list-item-subtitle>
+                          <v-list-item-title>{{ selectedKaryawan.Position.Name == "Operator Excavator" ? 'PC' : '' }}
+                            {{ selectedKaryawan.Position.Tonnage }}
+                            {{ selectedKaryawan.Position.Name == "Operator Excavator" ? '' : 'Ton' }}
+                          </v-list-item-title>
+                        </v-list-item>
+                      </div>
+                    </v-col>
+                    <v-col cols="auto">
+                      <v-btn icon="$edit" size="small" @click="openEditPosition">
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+
+                
+                  <v-form v-else ref="editPositionForm"> 
+                    <v-row dense style="margin-left:1rem" align="end" >
+                        <v-col cols="7">
+                          <v-combobox v-model="editPositionFormData" variant="underlined" density="compact" :items="positions"  item-value="Name" item-title="Name" 
+                          auto-select-first="exact"
+                          :rules="[
+                            (value) => this.required(value)
+                          ]"> </v-combobox>
+                        </v-col>
+                        <!-- If selected position has tonnage -->
+                        <v-col cols="4" v-if="editPositionFormData.Tonnages || editPositionFormData.Tonnage">
+                          <v-combobox 
+                            v-model="editPositionFormData.Tonnage" 
+                            variant="underlined"
+                            density="compact" 
+                            :items="editPositionFormData.Tonnages"
+                            :suffix="editPositionFormData.Name == 'Operator Crane' || editPositionFormData.Name == 'Operator Loader' ? 'Ton' : null"
+                            :prefix="editPositionFormData.Name == 'Operator Excavator' ? 'PC' : null"
+                            :rules="[
+                              (value) => this.required(value)
+                            ]"
+                          > </v-combobox>
+                        </v-col>
+                        <v-col cols="auto">
+                          <v-btn icon="mdi-cancel" size="small" style="color:red" @click="closeEditPosition"></v-btn>
+                      </v-col>
+                      <v-col cols="auto">
+                        <v-btn icon="mdi-check" size="small" style="color:green" @click="submitEditPosition"></v-btn>
+                      </v-col>
+                    </v-row>    
+                  </v-form>
                 </v-row>
               </v-col>
-              <v-col>
+
+              <!-- Log Karyawan and Download Contract Button -->
+              <v-col cols="3">
+                <!-- Log Karyawan -->
                 <v-row justify="end" style="margin-bottom: 1rem">
                   <v-btn @click="openLogKaryawanDialog">
                     <span class="material-symbols-outlined mr-1"> timeline </span>
@@ -140,6 +187,7 @@
                   </v-btn>
                 </v-row>
 
+                <!-- Download Contract Button -->
                 <v-row justify="end" style="margin-bottom: 1rem" 
                   v-if="
                   // contract is still active
@@ -157,6 +205,7 @@
 
               </v-col>
             </v-row>
+
             <div class="karyawan-profile">
               <v-list-item>
                 <v-list-item-subtitle>Tempat, Tanggal Lahir</v-list-item-subtitle>
@@ -314,9 +363,22 @@
                     {{ selectedKaryawan.Status.End ? 'Ubah Balik Cuti' : 'Atur Balik Cuti' }}
                   </v-btn>
                 </v-col>
+                <v-col @click="openMutasiDialog" cols="auto"> 
+                  <v-btn> 
+                    Mutasi
+                  </v-btn>
+                </v-col>
               </v-row>
 
-              <!-- Cut Off  -->
+              <!-- Balik Kerja -->
+              <v-row v-else-if="(selectedKaryawan.Status.Status == 'Resign' || selectedKaryawan.Status.Status == 'Cut Off')" style="margin : 1rem">
+                <v-col cols="auto">
+                  <v-btn @click="togglerHandler.isRejoinDialogOpen = true">
+                    Balik Kerja
+                  </v-btn>
+                </v-col>
+              </v-row>
+
               <v-row v-else-if="(!selectedKaryawan.Application.Application_Status && selectedKaryawan.Status.Status != 'Resign' && selectedKaryawan.Status.Status != 'Cut Off')" style="margin: 1rem">
                 <v-col cols="auto">
                   <v-btn @click="
@@ -328,18 +390,14 @@
                     Ajukan Form
                   </v-btn>
                 </v-col>
+                <v-col @click="openMutasiDialog" cols="auto"> 
+                  <v-btn> 
+                    Mutasi
+                  </v-btn>
+                </v-col>
                 <v-col cols="auto">
                   <v-btn @click="togglerHandler.isCutOffDialogOpen = true">
                     Cut Off
-                  </v-btn>
-                </v-col>
-              </v-row>
-
-              <!-- Balik Kerja -->
-              <v-row v-else-if="(selectedKaryawan.Status.Status == 'Resign' || selectedKaryawan.Status.Status == 'Cut Off')" style="margin : 1rem">
-                <v-col cols="auto">
-                  <v-btn @click="togglerHandler.isRejoinDialogOpen = true">
-                    Balik Kerja
                   </v-btn>
                 </v-col>
               </v-row>
@@ -673,7 +731,7 @@
         </v-dialog>
 
         <!-- Cut Off Dialog -->
-        <v-dialog v-model="togglerHandler.isCutOffDialogOpen" width="auto">
+        <v-dialog persistent v-model="togglerHandler.isCutOffDialogOpen" width="auto">
           <v-card width="700">
             <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
               <v-toolbar-title class="text-h6"> Cut Off </v-toolbar-title>
@@ -736,6 +794,77 @@
           </v-date-picker>
         </v-dialog>
 
+        <!-- Mutasi Dialog -->
+        <v-dialog persistent v-model="togglerHandler.isMutasiDialogOpen" width="auto">
+          <v-card width="700">
+            <!-- Header -->
+            <v-toolbar color="rgba(0, 0, 0, 0)" theme="light">
+              <v-toolbar-title class="text-h6"> Mutasi </v-toolbar-title>
+              <template v-slot:append>
+                <v-btn icon="Close">
+                  <span @click="closeMutasiDialog" class="material-symbols-outlined"> close </span>
+                </v-btn>
+              </template>
+            </v-toolbar>
+            <!-- Content -->
+            <v-container>
+              <v-form ref="mutasiFormData" lazy-validate>
+                <v-row>
+                  <v-col>
+                    <v-list-item-title>Tanggal Mutasi</v-list-item-title>
+                    <v-text-field variant="underlined" v-model="mutasiFormData.Date" density="compact" placeholder="DD/MM/YYYY" clearable required 
+                    :rules="[
+                          (value) => this.required(value),
+                          (value) => this.isDateValid(value),
+                    ]">
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <!-- Select Site & User -->
+                  <v-col>
+                    <v-list-item-title>Tujuan Mutasi</v-list-item-title>
+
+                    <v-row>
+                      <v-col>
+                        <v-list-item-subtitle>Site</v-list-item-subtitle>
+                        <v-combobox v-model="mutasiFormData.Site" variant='underlined' density="compact" 
+                          :items="sites.map((site)=>{
+                            return site.Name
+                          })"
+                          :rules="[
+                            (value) => this.required(value)
+                          ]"
+                        >
+                        </v-combobox>
+                      </v-col>
+                      <v-col v-if="mutasiFormData.Site">
+                        <v-list-item-subtitle>User</v-list-item-subtitle>
+                        <v-combobox v-model="mutasiFormData.User" variant='underlined' density="compact" 
+                        :items="users.map((user)=>{
+                          return user.Name
+                        })"
+                        :rules="[
+                          (value) => this.required(value)
+                        ]"
+                        > 
+                        </v-combobox>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-form>
+            </v-container>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" @click="closeMutasiDialog" variant="text">
+                Close
+              </v-btn>
+              <v-btn color="blue-darken-1" @click="submitMutasiForm" variant="text"> Save </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
       </div>
     </div>
 
@@ -748,7 +877,7 @@ import { ref } from 'vue'
 import moment from 'moment'
 import axios from 'axios'
 
-import { clone } from 'lodash'
+import { clone, debounce } from 'lodash'
 import { saveAs } from 'file-saver'
 
 import card_bg from '../../assets/crane_card_bg.jpg'
@@ -782,7 +911,10 @@ export default {
       isCutOffDialogOpen: ref(false),
       isCutOffDatePickerOpen: ref(false),
       isRejoinDialogOpen : ref(false),
-      isRejoinDatePickerOpen : ref(false)
+      isRejoinDatePickerOpen : ref(false),
+      isMutasiDialogOpen : ref(false),
+
+      editPosition : ref(false),
     },
 
     snackbarAttribute: {
@@ -798,6 +930,8 @@ export default {
     extendFormData: ref({}),
     cutOffFormData: ref({}),
     rejoinFormData: ref({}),
+    mutasiFormData: ref({}),
+    editPositionFormData: ref({}),
 
     // Filter Fields
     search: ref(''),
@@ -855,12 +989,37 @@ export default {
 
     statusList: [
       "Active", "Close Project", "Warning", "Resign", "Cut Off", "Cuti"
-    ]
+    ],
+
+    sites : ref([]),
+    users : ref([]),
+    positions : ref([]),
   }),
   watch: {
     // Clear the form if "Application_Type" is changed
     'editFormData.Application_Type': function (newType, oldType) {
       this.resetApplicationForm(this.editFormData, this.togglerHandler, newType, oldType)
+    },
+
+    // Update Users (Company) if Site is Changed - Mutasi
+    'mutasiFormData.Site': function (newSite) {
+      if(newSite){
+        this.updateUsersData(newSite)
+      }else{
+        this.users = []
+      }
+    },
+
+    // Update Tonnage List if Position Name is Changed - edit Position
+    'editPositionFormData.Name' : function(newPosition){
+      if(typeof newPosition === "string" && newPosition.trim()){
+        const position = this.positions.find(item => item.Name === newPosition)
+        if(position.Name == this.selectedKaryawan.Position.Name && this.selectedKaryawan.Position.Tonnage){
+          this.editPositionFormData.Tonnage = this.selectedKaryawan.Position.Tonnage
+        }else{
+          this.editPositionFormData.Tonnage = null
+        }
+      }
     }
   },
   methods: {
@@ -903,6 +1062,10 @@ export default {
     shrinkKaryawanDialog() {
       this.$store.commit('selectKaryawan', {})
       this.togglerHandler.karyawanExpand = false
+
+      if(this.togglerHandler.editPosition){
+        this.togglerHandler.editPosition = false
+      }
     },
 
     // Log Karyawan Handler
@@ -960,6 +1123,16 @@ export default {
       this.togglerHandler.isRejoinDialogOpen = false;
     },
 
+    openMutasiDialog(){
+      this.getSites()
+      this.togglerHandler.isMutasiDialogOpen = true
+    },
+
+    closeMutasiDialog(){
+      this.togglerHandler.isMutasiDialogOpen = false;
+      this.mutasiFormData = {};
+    },
+
     // Date Picker Handler
     openEndCutiDatePicker(start_cuti) {
       try {
@@ -1009,7 +1182,6 @@ export default {
     closeRejoinDatePicker(){
       this.togglerHandler.isRejoinDatePickerOpen = false
     },
-   
 
     // Get Log Dates to filter the log message
     getLogDates(messages) {
@@ -1282,10 +1454,112 @@ export default {
       }
     },
 
+    async getSites(){
+      await axios.get(`${this.karyawanURL}/company/sites`)
+      .then((response)=>{
+        this.sites = response.data
+      }).catch((error)=>{
+        console.error(error)
+      })
+    },
+
+    async getUsers(site){
+      const users = await axios.get(`${this.karyawanURL}/company?site=${site}`)
+      .then((response)=>{
+        return response.data
+      }).catch((error)=>{
+        if(error.response.status == 404){
+          throw new Error(error.response.data.message)
+        }else{
+          throw new Error(error)
+        }
+      })
+      return users
+    },
+
+    updateUsers(site){
+      this.getUsers(site)
+      .then((response)=>{
+        this.users = response
+      }).catch((error)=>{
+        console.error(error)
+      })
+    },
+
+    async submitMutasiForm(){
+      const { valid } = await this.$refs.mutasiFormData.validate()
+      // Change date format
+      this.mutasiFormData.Date = this.convertDDMMYYYYToYYYYMMDD(this.mutasiFormData.Date)
+      if(valid){
+        await axios.patch(`${this.karyawanURL}/karyawan/mutasi/${this.selectedKaryawan.ID}`, this.mutasiFormData)
+        .then((response)=>{
+          // Update User and Site
+          this.selectedKaryawan.Company.Name = this.mutasiFormData.User
+          this.selectedKaryawan.Company.Site.Name = this.mutasiFormData.Site
+          this.selectedKaryawan.Logs.push({
+            CreatedAt : moment(new Date()).format('YYYY-MM-DD'),
+            Start : this.mutasiFormData.Date,
+            End : null,
+            Type : 'Mutasi',
+            Message : `Mutasi ke ${this.mutasiFormData.User}-${this.mutasiFormData.Site} tanggal ${this.convertYYYYMMDDToDDMMMMYYYY(this.mutasiFormData.Date)}`
+          })
+
+          // Show Snackbar
+          this.openSnackbar(true, response.data.message)
+          // close dialog
+          this.closeMutasiDialog()
+        }).catch((error)=>{
+          console.error(error)
+          this.openSnackbar(false, error.data.message)
+        })
+      }
+    },
+
+    // Edit Position
+    async openEditPosition(){
+      this.togglerHandler.editPosition = true;
+
+      // Initiate value with 
+      this.editPositionFormData = this.positions.find(
+        (item) => 
+          item.Name == this.selectedKaryawan.Position.Name
+      )
+      this.editPositionFormData.Tonnage = this.selectedKaryawan.Position.Tonnage
+      
+    },
+
+    async closeEditPosition(){
+      this.togglerHandler.editPosition = false;
+      //Clear FormData
+      this.editPositionFormData = {}
+    },
+
+    async submitEditPosition(){
+      const { valid } = await this.$refs.editPositionForm.validate()
+      if(valid){
+        await axios.patch(`${this.karyawanURL}/karyawan/editposition/${this.selectedKaryawan.ID}`, this.editPositionFormData)
+        .then((response)=>{
+          this.selectedKaryawan.Position = this.editPositionFormData
+          this.editPositionFormData = {}
+          this.closeEditPosition()
+          this.openSnackbar(true, response.data.message)
+        }).catch((error)=>{
+          console.error(error)
+          this.openSnackbar(false, error.data.message)
+        })
+      }
+    }
+  },
+  created(){
+    // Initiate debounce (delay function call) to ensure it does not call every character input
+    // for Users Update in Mutasi
+    this.updateUsersData = debounce(this.updateUsers, 300)
   },
   mounted() {
-    this.getAllEmployees()
+    this.getAllEmployees();
+    this.showKaryawanPosition(this.positions)
   },
+
   computed: {
     // Filter the Employees
     filteredEmployees() {
@@ -1357,6 +1631,7 @@ export default {
       )
       return lastContract
     },
+
   }
 }
 </script>

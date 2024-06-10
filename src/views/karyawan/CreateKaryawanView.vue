@@ -92,13 +92,16 @@
             </v-combobox>
           </v-col>
           <!-- Tonase -->
-          <v-col cols="4" v-if="selectedPosition && selectedPosition.Tonnage">
+          <v-col cols="4" v-if="selectedPosition && selectedPosition.Tonnages">
             <v-list-item-title> Tonase </v-list-item-title>
             <v-list-item-subtitle> <i> Tonnage </i> </v-list-item-subtitle>
             <v-combobox v-model="formData.Position.Tonnage" label="Select a Tonnage" density="compact"
-              :items="selectedPosition.Tonnage" single-line variant="underlined" :rules="[
+              :items="selectedPosition.Tonnages" single-line variant="underlined" :rules="[
               (value) => this.required(value)
-            ]" suffix="Ton"></v-combobox>
+            ]" 
+            :suffix="selectedPosition.Name == 'Operator Crane' || selectedPosition.Name == 'Operator Loader' ? 'Ton' : null"
+            :prefix="selectedPosition.Name == 'Operator Excavator' ? 'PC' : null"
+            ></v-combobox>
           </v-col>
         </v-row>
         <v-row dense>
@@ -273,32 +276,10 @@ export default {
       }
     },
 
-    async showKaryawanPosition() {
-      await axios.get(`${this.karyawanURL}/position/`)
-        .then((response) => {
-          if(response.status == 200){   
-            // Change PositionList Format
-            response.data.forEach((item) => {
-              let existingPosition = this.positionList.find((position) => position.Name === item.Name);
-  
-              if (!existingPosition) {
-                let newPosition = {
-                  Name: item.Name,
-                  Tonnage: item.Tonnage !== null ? [item.Tonnage] : null
-                };
-                this.positionList.push(newPosition);
-              } else if (item.Tonnage !== null) {
-                existingPosition.Tonnage.push(item.Tonnage);
-              }
-            });
-          }
-        }).catch((error) => {
-          console.error(error)
-        })
-    }
+    
   },
   mounted() {
-    this.showKaryawanPosition()
+    this.showKaryawanPosition(this.positionList)
   },
   computed: {
     setPositionName() {
