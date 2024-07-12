@@ -18,11 +18,11 @@
                 >
 
                 <template v-slot:[`item.Status.Start`]="{ value }">
-                    {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
+                    {{ value ? moment(getDateObject(value)).format('DD MMMM YYYY') : '' }}
                 </template>
                 
                 <template v-slot:[`item.Status.End`]="{ value }">
-                    {{ value ? moment(getDateObj(value)).format('DD MMMM YYYY') : '' }}
+                    {{ value ? moment(getDateObject(value)).format('DD MMMM YYYY') : '' }}
                 </template>
 
                 <template v-slot:[`item.Status.Status`]="{ value }">
@@ -38,7 +38,7 @@
                         : item.Status.Status == 'Cuti' ||
                         item.Status.Status == 'Resign' ||
                         item.Status.Status == 'Cut Off'
-                        ? `${item.Status.Status} tanggal ${moment(getDateObj(item.Status.Start)).format('DD MMMM YYYY')}`
+                        ? `${item.Status.Status} tanggal ${moment(getDateObject(item.Status.Start)).format('DD MMMM YYYY')}`
                         : 'Belum Ajukan Form'
                     }}
                 </template>

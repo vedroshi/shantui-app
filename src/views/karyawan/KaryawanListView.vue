@@ -142,18 +142,17 @@
                     </v-col>
                   </v-row>
 
-                
-                  <v-form v-else ref="editPositionForm"> 
-                    <v-row dense style="margin-left:1rem" align="end" >
-                        <v-col cols="7">
-                          <v-combobox v-model="editPositionFormData" variant="underlined" density="compact" :items="positions"  item-value="Name" item-title="Name" 
+                  <v-form dense v-else ref="editPositionForm" style="width: 100%;"> 
+                    <v-row dense style="margin-left:1rem">
+                        <v-col cols="3" md="3" sm="7" align="end" >
+                          <v-combobox  v-model="editPositionFormData" variant="underlined" density="compact" :items="positions"  item-value="Name" item-title="Name" 
                           auto-select-first="exact"
                           :rules="[
                             (value) => this.required(value)
                           ]"> </v-combobox>
                         </v-col>
                         <!-- If selected position has tonnage -->
-                        <v-col cols="4" v-if="editPositionFormData.Tonnages || editPositionFormData.Tonnage">
+                        <v-col align="end" cols="2" md="2" sm="3" v-if="editPositionFormData.Tonnages || editPositionFormData.Tonnage">
                           <v-combobox 
                             v-model="editPositionFormData.Tonnage" 
                             variant="underlined"
@@ -869,6 +868,18 @@
     </div>
 
     <SnackbarView v-model:snackbarAttribute="snackbarAttribute" @update:snackbarAttribute="updateSnackbarAttribute" />
+
+    <v-dialog v-model="togglerHandler.isGenerateLoadingOpen" width="300" persistent align="center" justify="center" max-height="500">
+      <v-card style="padding : 2rem">
+        <v-row align="center" justify="center">
+          <v-col dense style>
+            <v-card-title class="mb-5"> Generating PKWT </v-card-title>
+            <v-progress-circular color="dark-blue" indeterminate :size="70" :width="7"></v-progress-circular>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
 
@@ -913,7 +924,7 @@ export default {
       isRejoinDialogOpen : ref(false),
       isRejoinDatePickerOpen : ref(false),
       isMutasiDialogOpen : ref(false),
-
+      isGenerateLoadingOpen : ref(false),
       editPosition : ref(false),
     },
 
@@ -1403,18 +1414,21 @@ export default {
     },
 
     async downloadContract() {
+      this.togglerHandler.isGenerateLoadingOpen = true
       await axios.get(`${this.karyawanURL}/contract/generate/${this.selectedKaryawan.ID}`, {
         responseType: 'blob'
       })
         .then((response) => {
-
           // Create a Blob object from the response data
           const blob = new Blob([response.data], { type: response.headers['content-type'] });
-          const fileName = `PKWT - ${this.selectedKaryawan.Name.toUpperCase()}.docx`
+          const fileName = `PKWT - ${this.selectedKaryawan.Name.toUpperCase()}.docx`;
           saveAs(blob, fileName)
-
+          this.togglerHandler.isGenerateLoadingOpen = false
+          this.openSnackbar(true, "File Generated")
+        
         }).catch((error) => {
           console.log(error)
+          this.openSnackbar(false, error.message)
         })
     },
 
