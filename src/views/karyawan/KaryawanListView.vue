@@ -1428,6 +1428,7 @@ export default {
         
         }).catch((error) => {
           console.log(error)
+          this.togglerHandler.isGenerateLoadingOpen = false
           this.openSnackbar(false, error.message)
         })
     },
